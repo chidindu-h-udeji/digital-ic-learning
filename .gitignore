@@ -1,0 +1,19 @@
+# Verilog Simulation Files
+*.out
+*.vcd
+*.vvp
+
+# Analog Simulation Files
+*.raw
+*.op.raw
+*.net
+
+# OpenLane and EDA Tool Logs
+runs/
+*.log
+*.jou
+*.pb
+
+# Operating System Junk
+.DS_Store
+Thumbs.db
