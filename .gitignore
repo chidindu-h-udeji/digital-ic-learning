@@ -17,3 +17,11 @@ runs/
 # Operating System Junk
 .DS_Store
 Thumbs.db
+
+# Python Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
