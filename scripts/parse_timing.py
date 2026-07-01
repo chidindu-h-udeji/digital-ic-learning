@@ -20,10 +20,10 @@ def parse_timing_report(filepath):
             line = line.strip()     # Strip whitespace
             
             # DETECTION AND EXTRACTION
-            if 'Startpoint' in line:
+            if line.startswith('Startpoint:'):
                 current_path['startpoint'] = line.split()[1] # Turns into a list and [1] grabs startpoint
 
-            elif 'Endpoint' in line:
+            elif line.startswith('Endpoint:'):
                 current_path['endpoint'] = line.split()[1] # Turns into a list and [1] grabs endpoint
 
             elif 'slack' in line:
@@ -32,9 +32,9 @@ def parse_timing_report(filepath):
                     slack = re.search(r'(?<!\S)[+-]?\d+(?:\.\d+)?', line).group() 
                     current_path['slack'] = float(slack)
 
-                    # Grabs the word that's not slack
-                    status = re.search(r'\b(?!slack\b)[A-Za-z]\w*\b', line).group() 
-                    current_path['status'] = status.strip('()')
+                    # Grabs what is inside the parentheses
+                    status = re.search(r'\((\w+)\)', line).group(1) 
+                    current_path['status'] = status
                 
                 except (AttributeError, ValueError):
                     print('Skipping malformed slack line')
