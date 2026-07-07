@@ -1,0 +1,4 @@
+# Simulation Artifacts
+*.out
+*.vvp
+*.vcd
