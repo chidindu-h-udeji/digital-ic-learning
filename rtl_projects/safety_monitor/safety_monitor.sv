@@ -10,10 +10,14 @@ module safety_monitor (
     output buzzer,
     output fault_detected
 );
-    parameter Normal = 0, Warning = 1, Alarm = 2, Lockout = 3, Threshold = 10;
+
+    parameter [1:0] Normal = 2'b00, Warning = 2'b01, Alarm = 2'b10, Lockout = 2'b11;
+    parameter Threshold = 9;
+
     reg [1:0] state, next_state;
     reg [4:0] fault_counter;
-  
+
+    // State Register
     always @ (posedge clk) begin
         if (reset)
             state <= Normal;
@@ -21,6 +25,7 @@ module safety_monitor (
             state <= next_state;
     end
     
+    // Fault Counter Integration
     always @ (posedge clk) begin
         if (reset | ~(state == Alarm))
             fault_counter <= 0;
@@ -28,6 +33,7 @@ module safety_monitor (
             fault_counter <= fault_counter + 1;
     end
     
+    // Next-State Logic
     always @ (*) begin
         next_state = state;
         case (state)
@@ -42,32 +48,28 @@ module safety_monitor (
             Warning: begin
                 if ((a_alarm | b_alarm) | (a_warn & b_warn))
                     next_state = Alarm;
-                else if (a_warn | b_warn)
+                else if (a_warn ^ b_warn)
                     next_state = Warning;
                 else
                     next_state = Normal;
             end
             Alarm: begin
-                if (reset)
-                    next_state = Normal;
-                else if (fault_counter > Threshold)
+                if (fault_counter >= Threshold)
                     next_state = Lockout;
                 else
                     next_state = Alarm;
             end
             Lockout: begin
-                if (reset)
-                    next_state = Normal;
-                else
-                    next_state = Lockout;
+                next_state = Lockout; 
             end
             default: next_state = Normal;
         endcase
     end
     
+    // Output Logic
     assign alert_level = state;
-    assign shutoff = (state == Alarm) | (state == Lockout);
-    assign buzzer = (state == Alarm) | (state == Lockout);
+    assign shutoff = (state == Lockout);
+    assign buzzer = (state == Warning) | (state == Alarm) | (state == Lockout);
     assign fault_detected = (state == Lockout);
   
-endmodule                
+endmodule
