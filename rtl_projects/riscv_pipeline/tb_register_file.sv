@@ -32,7 +32,17 @@ module tb_register_file;
     @(negedge clk);
     reset = 0;
 
-    // SCENARIO 1: Normal Write and Read
+    // SCENARIO 1: Verify Reset (Unwritten register)
+    @(negedge clk);
+    rs1_addr = 1;
+    #1;
+    if (rs1_data !== 0) begin
+      $display("ERROR (Scen 1): Expected reset output (0), got %h", rs1_data);
+      errors = errors + 1;
+    end
+
+    // SCENARIO 2: Normal Write and Read
+    @(negedge clk);
     rd_addr = 5; rd_data = 32'hDEADBEEF; reg_write = 1;
     @(negedge clk);
     reg_write = 0;
@@ -41,11 +51,11 @@ module tb_register_file;
     rs1_addr = 5;
     #1;
     if (rs1_data !== 32'hDEADBEEF) begin
-      $display("ERROR (Scen 1): Expected DEADBEEF, got %h", rs1_data);
+      $display("ERROR (Scen 2): Expected DEADBEEF, got %h", rs1_data);
       errors = errors + 1;
     end
     
-    // SCENARIO 2: The x0 Trap (Hardwired to 0)
+    // SCENARIO 3: The x0 Trap (Hardwired to 0)
     @(negedge clk);
     rd_addr = 0; rd_data = 32'hFFFFFFFF; reg_write = 1;
     @(negedge clk);
@@ -55,11 +65,11 @@ module tb_register_file;
     rs1_addr = 0;
     #1;
     if (rs1_data !== 0) begin
-      $display("ERROR (Scen 2): Expected not to write to x0, got %h", rs1_data);
+      $display("ERROR (Scen 3): Expected not to write to x0, got %h", rs1_data);
       errors = errors + 1;
     end
     
-    // SCENARIO 3: Dual Read
+    // SCENARIO 4: Dual Read
     @(negedge clk);
     rd_addr = 2; rd_data = 32'hFACEBEEF; reg_write = 1;
     @(negedge clk); 
@@ -75,15 +85,15 @@ module tb_register_file;
     rs2_addr = 3;
     #1; 
     if (rs1_data !== 32'hFACEBEEF) begin
-      $display("ERROR (Scen 3, rs1): Expected FACEBEEF, got %h", rs1_data);
+      $display("ERROR (Scen 4, rs1): Expected FACEBEEF, got %h", rs1_data);
       errors = errors + 1;
     end
     if (rs2_data !== 32'hCAFEBEEF) begin
-      $display("ERROR (Scen 3, rs2): Expected CAFEBEEF, got %h", rs2_data);
+      $display("ERROR (Scen 4, rs2): Expected CAFEBEEF, got %h", rs2_data);
       errors = errors + 1;
     end
     
-    // SCENARIO 4: Write Enable Test (reg_write = 0)
+    // SCENARIO 5: Write Enable Test (reg_write = 0)
     @(negedge clk);
     rd_addr = 2; rd_data = 32'hBADBAD00; reg_write = 0;
     @(negedge clk);
@@ -92,17 +102,17 @@ module tb_register_file;
     rs1_addr = 2;
     #1;
     if (rs1_data !== 32'hFACEBEEF) begin
-      $display("ERROR (Scen 4): Expected FACEBEEF, got %h", rs1_data);
+      $display("ERROR (Scen 5): Expected FACEBEEF, got %h", rs1_data);
       errors = errors + 1;
     end
     
-    // SCENARIO 5: RAW Forwarding Test
+    // SCENARIO 6: RAW Forwarding Test
     @(negedge clk);
     rd_addr = 7; rd_data = 32'hFEEDBEEF; reg_write = 1;
     rs1_addr = 7; // Request read on the exact same cycle
     #1;
     if (rs1_data !== 32'hFEEDBEEF) begin
-      $display("ERROR (Scen 5): Expected FEEDBEEF, got %h", rs1_data);
+      $display("ERROR (Scen 6): Expected FEEDBEEF, got %h", rs1_data);
       errors = errors + 1;
     end
     @(negedge clk);
