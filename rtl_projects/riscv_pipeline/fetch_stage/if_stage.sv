@@ -7,7 +7,8 @@ module if_stage (
   input  logic        branch_taken,
   input  logic [31:0] branch_target,
   output logic [31:0] pc_out,
-  output logic [31:0] instruction
+  output logic [31:0] instruction,
+  output logic [31:0] pc_plus_4
 );
 
   // Instantiate PC Logic
@@ -17,7 +18,8 @@ module if_stage (
     .stall(stall), 
     .branch_taken(branch_taken), 
     .branch_target(branch_target), 
-    .pc_out(pc_out)
+    .pc_out(pc_out),
+    .pc_plus_4(pc_plus_4)
   );
 
   // Instantiate Instruction Memory

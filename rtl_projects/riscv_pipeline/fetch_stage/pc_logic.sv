@@ -6,11 +6,9 @@ module pc_logic (
   input  logic        stall,
   input  logic        branch_taken,
   input  logic [31:0] branch_target,
-  output logic [31:0] pc_out
+  output logic [31:0] pc_out,
+  output logic [31:0] pc_plus_4
 );
-
-  // Internal wire for next sequential PC
-  logic [31:0] pc_plus_4;
 
   // Synchronous PC register with priority multiplexer
   always_ff @(posedge clk) begin

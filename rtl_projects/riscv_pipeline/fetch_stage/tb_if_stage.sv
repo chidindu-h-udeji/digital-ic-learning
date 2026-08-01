@@ -3,7 +3,7 @@
 module tb_if_stage;
   logic        clk = 0, reset;
   logic        stall, branch_taken; 
-  logic [31:0] branch_target, pc_out, instruction;
+  logic [31:0] branch_target, pc_out, pc_plus_4, instruction;
   
   integer errors = 0; // Error counter
   
@@ -14,6 +14,7 @@ module tb_if_stage;
     .branch_taken(branch_taken), 
     .branch_target(branch_target), 
     .pc_out(pc_out),
+    .pc_plus_4(pc_plus_4),
     .instruction(instruction)
   );
   

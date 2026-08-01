@@ -3,7 +3,7 @@
 module tb_pc_logic;
   logic        clk = 0, reset;
   logic        stall, branch_taken; 
-  logic [31:0] branch_target, pc_out;
+  logic [31:0] branch_target, pc_out, pc_plus_4;
   
   integer errors = 0; // Error counter
   
@@ -13,7 +13,8 @@ module tb_pc_logic;
     .stall(stall), 
     .branch_taken(branch_taken), 
     .branch_target(branch_target), 
-    .pc_out(pc_out)
+    .pc_out(pc_out),
+    .pc_plus_4(pc_plus_4)
   );
   
   always #5 clk = ~clk; // 10ns clock
