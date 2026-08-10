@@ -17,6 +17,7 @@ module id_ex_reg (
   input  logic [4:0]  rd_addr_in,
   input  logic [2:0]  funct3_in,
   input  logic [6:0]  funct7_in,
+  input  logic [6:0]  opcode_in,
 
   // Control Payload (Inputs from Decode)
   input  logic        reg_write_in,
@@ -36,6 +37,7 @@ module id_ex_reg (
   output logic [4:0]  rd_addr_out,
   output logic [2:0]  funct3_out,
   output logic [6:0]  funct7_out,
+  output logic [6:0]  opcode_out,
 
   // 5. Control Payload (Outputs to Execute)
   output logic        reg_write_out,
@@ -48,7 +50,7 @@ module id_ex_reg (
 
   always @(posedge clk) begin
     if (reset) begin
-      {pc_out, rs1_data_out, rs2_data_out, imm_ext_out, rs1_addr_out, rs2_addr_out, rd_addr_out, funct3_out, funct7_out} <= 0;
+      {pc_out, rs1_data_out, rs2_data_out, imm_ext_out, rs1_addr_out, rs2_addr_out, rd_addr_out, funct3_out, funct7_out, opcode_out} <= 0;
       {reg_write_out, alu_src_out, mem_read_out, mem_write_out, mem_to_reg_out, branch_out} <= 0;
     
     end else if (flush) begin
@@ -69,6 +71,7 @@ module id_ex_reg (
       rd_addr_out  <= rd_addr_in;
       funct3_out   <= funct3_in;
       funct7_out   <= funct7_in;
+      opcode_out   <= opcode_in;
       
       // Pass control payload forward
       reg_write_out  <= reg_write_in;

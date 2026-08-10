@@ -4,7 +4,7 @@ module tb_id_stage;
   logic        reg_write, alu_src, mem_read, mem_write, mem_to_reg, branch;
   logic [2:0]  funct3;
   logic [4:0]  rs1_addr, rs2_addr, rd_addr;
-  logic [6:0]  funct7;
+  logic [6:0]  funct7, opcode_out;
   logic [31:0] instruction, pc, rs1_data, rs2_data, imm_ext, pc_out, rs1_data_out, rs2_data_out;
   
   integer errors = 0; // Error counter
@@ -20,6 +20,7 @@ module tb_id_stage;
     .imm_ext(imm_ext),
     .funct3(funct3),
     .funct7(funct7),
+    .opcode_out(opcode_out),
     .pc_out(pc_out),
     .rs1_data_out(rs1_data_out),
     .rs2_data_out(rs2_data_out),
@@ -42,7 +43,7 @@ module tb_id_stage;
     // SCENARIO 1: R-Type
     instruction = 32'h003100B3; // add x1, x2, x3
     #10;
-    if (rs1_addr !== 2 || rs2_addr !== 3 || rd_addr !== 1 || funct3 !== 0 || funct7 !== 0) begin
+    if (rs1_addr !== 2 || rs2_addr !== 3 || rd_addr !== 1 || funct3 !== 0 || funct7 !== 0 || opcode_out !== 7'h33) begin
       $display("ERROR (Scen 1): Instruction slicing failed");
       errors = errors + 1;
     end
@@ -62,7 +63,7 @@ module tb_id_stage;
     // SCENARIO 2: I-Type
     instruction = 32'hFF600293; // addi x5, x0, -10
     #10;
-    if (rs1_addr !== 0 || rd_addr !== 5 || funct3 !== 0) begin
+    if (rs1_addr !== 0 || rd_addr !== 5 || funct3 !== 0 || opcode_out !== 7'h13) begin
       $display("ERROR (Scen 2): Instruction slicing failed (rs1, rd, funct3)");
       errors = errors + 1;
     end
@@ -78,7 +79,7 @@ module tb_id_stage;
     // SCENARIO 3: S-Type
     instruction = 32'h00502623; // sw x5, 12(x0)
     #10;
-    if (rs1_addr !== 0 || rs2_addr !== 5 || funct3 !== 2) begin
+    if (rs1_addr !== 0 || rs2_addr !== 5 || funct3 !== 2 || opcode_out !== 7'h23) begin
       $display("ERROR (Scen 3): Instruction slicing failed (rs1, rs2, funct3)");
       errors = errors + 1;
     end
@@ -94,7 +95,7 @@ module tb_id_stage;
     // SCENARIO 4: Load
     instruction = 32'h01002283; // lw x5, 16(x0)
     #10;
-    if (rs1_addr !== 0 || rd_addr !== 5 || funct3 !== 2) begin
+    if (rs1_addr !== 0 || rd_addr !== 5 || funct3 !== 2 || opcode_out !== 7'h03) begin
       $display("ERROR (Scen 4): Instruction slicing failed (rs1, rs2, funct3)");
       errors = errors + 1;
     end
@@ -109,8 +110,8 @@ module tb_id_stage;
     
     // SCENARIO 5: Branch
     instruction = 32'h00500863; // beq x0, x5, 16
-    #10
-    if (rs1_addr !== 0 || rs2_addr !== 5 || funct3 !== 0) begin
+    #10;
+    if (rs1_addr !== 0 || rs2_addr !== 5 || funct3 !== 0 || opcode_out !== 7'h63) begin
       $display("ERROR (Scen 5): Instruction slicing failed (rs1, rs2, funct3)");
       errors = errors + 1;
     end

@@ -12,6 +12,7 @@ module id_stage (
   output logic [31:0] imm_ext,
   output logic [2:0]  funct3,
   output logic [6:0]  funct7,
+  output logic [6:0]  opcode_out,
   output logic [31:0] pc_out,
   output logic [31:0] rs1_data_out,
   output logic [31:0] rs2_data_out,
@@ -39,6 +40,7 @@ module id_stage (
   assign pc_out       = pc;
   assign rs1_data_out = rs1_data;
   assign rs2_data_out = rs2_data;
+  assign opcode_out   = opcode;
   
   // 3. Instantiate Immediate Generator
   imm_gen imm_gen_inst (
