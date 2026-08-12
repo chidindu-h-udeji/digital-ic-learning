@@ -27,7 +27,7 @@ module ex_mem_reg (
   output logic        reg_write_out
 );
   
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       {alu_result_out, rs2_data_out, rd_addr_out, mem_read_out, mem_write_out, mem_to_reg_out, reg_write_out} <= 0;
     end else begin
