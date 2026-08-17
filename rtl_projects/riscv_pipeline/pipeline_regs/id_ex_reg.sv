@@ -48,7 +48,7 @@ module id_ex_reg (
   output logic        branch_out
 );
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       {pc_out, rs1_data_out, rs2_data_out, imm_ext_out, rs1_addr_out, rs2_addr_out, rd_addr_out, funct3_out, funct7_out, opcode_out} <= 0;
       {reg_write_out, alu_src_out, mem_read_out, mem_write_out, mem_to_reg_out, branch_out} <= 0;
