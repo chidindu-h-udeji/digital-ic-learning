@@ -10,30 +10,37 @@ echo "========================================"
 
 # Array of all simulation scripts in pipeline order
 declare -a scripts=(
-    # Fetch Stage
+    # 1. Fetch Stage
     "fetch_stage/sim_pc.sh"
     "fetch_stage/sim_imem.sh"
     "fetch_stage/sim_if.sh"
     
-    # Decode Stage & Reg File
+    # 2. Decode Stage & Reg File
     "decode_stage/sim_if_id.sh"
     "decode_stage/sim_control_unit.sh"
     "decode_stage/sim_imm_gen.sh"
     "register_file/sim_run.sh"
     "decode_stage/sim_id_stage.sh"
     
-    # Execute Stage
+    # 3. Execute Stage
     "pipeline_regs/sim_id_ex_reg.sh"
     "execute/sim_ex_stage.sh"
     
-    # Memory Stage
+    # 4. Memory Stage
     "pipeline_regs/sim_ex_mem.sh"
     "mem_stage/sim_data_memory.sh"
     "mem_stage/sim_mem_stage.sh"
     
-    # Writeback Stage
+    # 5. Writeback Stage
     "pipeline_regs/sim_mem_wb.sh"
     "wb_stage/sim_wb_stage.sh"
+
+    # 6. Hazard & Forwarding Units
+    "hazard_unit/sim_hazard.sh"
+    "forwarding_unit/sim_forwarding.sh"
+
+    # 7. Top-Level Integration
+    "core/sim_core.sh"
 )
 
 errors=0
