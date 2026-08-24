@@ -4,16 +4,16 @@
 iverilog -g2012 -o sim_core.vvp \
   riscv_core.sv \
   tb_riscv_core.sv \
-  ../fetch_stage/pc_logic.sv \
-  ../fetch_stage/instruction_memory.sv \
-  ../fetch_stage/if_stage.sv \
-  ../decode_stage/if_id_register.sv \
-  ../decode_stage/control_unit.sv \
-  ../decode_stage/imm_gen.sv \
-  ../decode_stage/id_stage.sv \
+  ../if_stage/pc_logic.sv \
+  ../if_stage/instruction_memory.sv \
+  ../if_stage/if_stage.sv \
+  ../pipeline_regs/if_id_reg.sv \
+  ../id_stage/control_unit.sv \
+  ../id_stage/imm_gen.sv \
+  ../id_stage/id_stage.sv \
   ../register_file/register_file.sv \
   ../pipeline_regs/id_ex_reg.sv \
-  ../execute/ex_stage.sv \
+  ../ex_stage/ex_stage.sv \
   ../pipeline_regs/ex_mem_reg.sv \
   ../mem_stage/data_memory.sv \
   ../mem_stage/mem_stage.sv \
