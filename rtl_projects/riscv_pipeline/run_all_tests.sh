@@ -11,33 +11,33 @@ echo "========================================"
 # Array of all simulation scripts in pipeline order
 declare -a scripts=(
     # 1. Fetch Stage
-    "fetch_stage/sim_pc.sh"
-    "fetch_stage/sim_imem.sh"
-    "fetch_stage/sim_if.sh"
+    "if_stage/sim_pc.sh"
+    "if_stage/sim_imem.sh"
+    "if_stage/sim_if_stage.sh"
     
     # 2. Decode Stage & Reg File
-    "decode_stage/sim_if_id.sh"
-    "decode_stage/sim_control_unit.sh"
-    "decode_stage/sim_imm_gen.sh"
-    "register_file/sim_run.sh"
-    "decode_stage/sim_id_stage.sh"
+    "pipeline_regs/sim_if_id_reg.sh"
+    "id_stage/sim_control_unit.sh"
+    "id_stage/sim_imm_gen.sh"
+    "register_file/sim_register_file.sh"
+    "id_stage/sim_id_stage.sh"
     
     # 3. Execute Stage
     "pipeline_regs/sim_id_ex_reg.sh"
-    "execute/sim_ex_stage.sh"
+    "ex_stage/sim_ex_stage.sh"
     
     # 4. Memory Stage
-    "pipeline_regs/sim_ex_mem.sh"
+    "pipeline_regs/sim_ex_mem_reg.sh"
     "mem_stage/sim_data_memory.sh"
     "mem_stage/sim_mem_stage.sh"
     
     # 5. Writeback Stage
-    "pipeline_regs/sim_mem_wb.sh"
+    "pipeline_regs/sim_mem_wb_reg.sh"
     "wb_stage/sim_wb_stage.sh"
 
     # 6. Hazard & Forwarding Units
-    "hazard_unit/sim_hazard.sh"
-    "forwarding_unit/sim_forwarding.sh"
+    "hazard_unit/sim_hazard_unit.sh"
+    "forwarding_unit/sim_forwarding_unit.sh"
 
     # 7. Top-Level Integration
     "core/sim_core.sh"
