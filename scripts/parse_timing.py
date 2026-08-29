@@ -1,86 +1,66 @@
-import csv
 import sys
+import json
 import os
-import re
 
-"""
-OpenLane Timing Report Parser
-Takes an OpenLane .rpt file, extracts the startpoint, endpoint, 
-slack, and status of every timing path, and outputs a formatted 
-terminal summary and a results.csv file.
-Usage: python3 parse_timing.py <filepath>
-"""
-
-def parse_timing_report(filepath):
-    paths = []          # List for the completed dictionaries
-    current_path = {}   # Temporary bucket for current path
-
-    with open(filepath, 'r') as f:  # Open file      
-        for line in f:              # Loop line by line       
-            line = line.strip()     # Strip whitespace
-            
-            # DETECTION AND EXTRACTION
-            if line.startswith('Startpoint:'):
-                current_path['startpoint'] = line.split()[1] # Turns into a list and [1] grabs startpoint
-
-            elif line.startswith('Endpoint:'):
-                current_path['endpoint'] = line.split()[1] # Turns into a list and [1] grabs endpoint
-
-            elif 'slack' in line:
-                try:
-                    # Grabs the numerical value
-                    slack = re.search(r'(?<!\S)[+-]?\d+(?:\.\d+)?', line).group() 
-                    current_path['slack'] = float(slack)
-
-                    # Grabs what is inside the parentheses
-                    status = re.search(r'\((\w+)\)', line).group(1) 
-                    current_path['status'] = status
-                
-                except (AttributeError, ValueError):
-                    print('Skipping malformed slack line')
-                    continue
-
-                
-                paths.append(current_path)  # Append completed dictionary to list
-                
-                current_path = {}           # Empty the bucket for the next path
-
-    return paths
-
-def print_summary(paths):
-    # Print the table header and horizontal divider
-    print(f"{'Startpoint':<15} | {'Endpoint':<15} | {'Status':<15} | {'Slack':>10}")
-    print('-' * 70)
-    
-    # Loops list and prints values
-    for path in paths:
-        print(f"{path['startpoint']:<15} | {path['endpoint']:<15} | {path['status']:<15} | {path['slack']:>10}")
-
-def write_csv(paths, output_path):
-    with open(output_path, 'w', newline='') as f:    # Write file
-        fieldnames = ['startpoint', 'endpoint', 'slack', 'status']
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+def load_metrics(run_dir):
+    # Try appending final/metrics.json, otherwise assume they passed the file directly
+    metrics_path = os.path.join(run_dir, "final", "metrics.json")
+    if not os.path.exists(metrics_path):
+        metrics_path = run_dir
         
-        writer.writeheader() # Writes the top row of column names
-        
-        writer.writerows(paths) # Writes dictionary
+    with open(metrics_path, 'r') as f:
+        return json.load(f)
 
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python3 parse_timing.py <run_dir_1> <run_dir_2>")
+        sys.exit(1)
 
+    # Load both runs
+    metrics1 = load_metrics(sys.argv[1])
+    metrics2 = load_metrics(sys.argv[2])
 
-# Main execution
+    # Define the fields we want to extract
+    keys_to_compare = [
+        ("Setup WNS (ns)", "timing__setup__ws"),
+        ("Max Slew Violations", "design__max_slew_violation__count"),
+        ("Max Cap Violations", "design__max_cap_violation__count"),
+        ("Max Fanout Violations", "design__max_fanout_violation__count"),
+        ("Die Area (um^2)", "design__die__area"),
+        ("Utilization", "design__instance__utilization")
+    ]
+
+    # Print Header
+    print(f"\n{'Metric':<25} | {'Run 1 (20ns)':<15} | {'Run 2 (35ns)':<15}")
+    print("-" * 62)
+
+    # Print Table Rows
+    for label, key in keys_to_compare:
+        val1 = metrics1.get(key, "N/A")
+        val2 = metrics2.get(key, "N/A")
+
+        # Round floats for readability
+        if isinstance(val1, float): val1 = round(val1, 4)
+        if isinstance(val2, float): val2 = round(val2, 4)
+
+        print(f"{label:<25} | {str(val1):<15} | {str(val2):<15}")
+
+    print("-" * 62)
+
+    # Automated Sanity Checks
+    print("\n--- Sanity Checks ---")
+    if metrics1.get("design__die__area") == metrics2.get("design__die__area"):
+        print("[PASS] Die Area remained constant across constraints.")
+    else:
+        print("[WARN] Die Area changed unexpectedly!")
+
+    util1 = round(float(metrics1.get("design__instance__utilization", 0)), 4)
+    util2 = round(float(metrics2.get("design__instance__utilization", 0)), 4)
+    if util1 == util2:
+        print("[PASS] Logic Utilization remained constant.")
+    else:
+        print("[WARN] Utilization changed unexpectedly!")
+    print()
+
 if __name__ == '__main__':
-    
-    # Check for the right number of arguments
-    if len(sys.argv) != 2:
-        print('Error: Usage is python3 script.py <file>')
-        sys.exit()
-
-    # Check if the file exists
-    filepath = sys.argv[1]
-    if not os.path.exists(filepath):
-        print(f'Error: Could not find {filepath}')
-        sys.exit()
-
-    paths = parse_timing_report(filepath)
-    print_summary(paths)
-    write_csv(paths, 'results.csv')
+    main()
