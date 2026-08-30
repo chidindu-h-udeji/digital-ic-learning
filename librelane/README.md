@@ -94,7 +94,7 @@ Nearly 3ns of the worst path is spent purely distributing the clock — a direct
 ## Repository Structure
 
 ```
-openlane/runs/
+librelane/runs/
 ├── riscv_20ns/          # Failing run — signoff artifacts trimmed to portfolio-relevant files
 │   ├── metrics.json / metrics.csv
 │   ├── render/riscv_core.png
@@ -120,7 +120,7 @@ librelane ~/my_designs/riscv_core/config.json
 `scripts/parse_timing.py` extends the earlier single-report parser (written for the Python gate condition) to accept two run directories and print a side-by-side comparison table with automated sanity checks (die area and utilization should remain constant across a pure constraint change):
 
 ```bash
-python3 scripts/parse_timing.py openlane/runs/riscv_20ns openlane/runs/riscv_35ns
+python3 scripts/parse_timing.py librelane/runs/riscv_20ns openlane/runs/riscv_35ns
 ```
 
 ## Future Work
