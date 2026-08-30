@@ -25,3 +25,5 @@ __pycache__/
 .venv/
 venv/
 env/
+# Exception: keep final LibreLane outputs for the OpenLane portfolio deliverable
+!openlane/runs/
