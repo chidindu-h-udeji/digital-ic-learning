@@ -53,6 +53,12 @@ Run at `CLOCK_PERIOD` 20ns and, separately, 35ns, under run tags `RUN_2026-08-27
 
 Both runs completed all 80 flow stages with zero flow errors. Die area and utilization are identical between runs, as expected — only the timing constraint changed, not the netlist.
 
+### Physical Layout
+
+<img src="./runs/riscv_35ns/render/riscv_core.png" width="100%" alt="RISC-V core physical layout, 35ns constraint, DRC/LVS clean">
+
+*Rendered physical layout at the passing 35ns constraint — synthesis through detailed routing on the Sky130 process.*
+
 ### Root Cause: Why the 20ns Run Failed
 
 Both memories in the design are declared as:
