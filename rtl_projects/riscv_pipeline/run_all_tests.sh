@@ -57,12 +57,14 @@ for script in "${scripts[@]}"; do
         # Run the script and capture the output
         output=$(./"$cmd" 2>&1)
         
-        # Check if the output contains failure keywords
-        if echo "$output" | grep -qiE "failed|error[^s]|errors: [1-9]"; then
+        # Explicitly check that the testbench reports zero errors
+        if echo "$output" | grep -q "Errors: 0"; then
+            echo "✅ PASSED: $script"
+        else
             echo "❌ FAILED: $script"
             errors=$((errors + 1))
-        else
-            echo "✅ PASSED: $script"
+            # Print the output to see why it failed or if it was silent
+            echo "   Output: $output"
         fi
         
         # Return to the root directory silently
