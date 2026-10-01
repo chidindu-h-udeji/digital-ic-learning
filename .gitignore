@@ -9,7 +9,7 @@
 *.net
 
 # OpenLane and EDA Tool Logs
-runs/
+/runs/
 *.log
 *.jou
 *.pb
@@ -25,5 +25,15 @@ __pycache__/
 .venv/
 venv/
 env/
-# Exception: keep final LibreLane outputs for the OpenLane portfolio deliverable
-!librelane/runs/
+
+# LibreLane Portfolio Whitelist Strategy
+librelane/runs/**
+!librelane/runs/**/
+!librelane/runs/**/metrics.json
+!librelane/runs/**/metrics.csv
+!librelane/runs/*/render/*.png
+!librelane/runs/*/final/render/*.png
+!librelane/runs/*/sdc/*.sdc
+!librelane/runs/*/final/sdc/*.sdc
+sky130_sram_macros/
+results.csv

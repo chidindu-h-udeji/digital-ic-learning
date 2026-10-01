@@ -8,7 +8,7 @@ Classic 5-stage in-order pipeline: **Fetch → Decode → Execute → Memory →
 
 ![RV32I pipeline architecture](./diagrams/RV32I%20pipeline%20architecture.drawio.png)
 
-**Reading the diagram:** The solid black lines trace the main datapath left-to-right, while the dashed blue line shows the write-back data looping back to the register file. The tall yellow bars represent the pipeline registers physically dividing the stages (IF/ID, ID/EX, EX/MEM, MEM/WB). Datapath computation and memory blocks are blue, while multiplexers are purple. The Hazard Detection Unit and Forwarding Unit (highlighted in red) operate outside the main datapath; they monitor pipeline states and assert control via the dashed red lines to inject stalls, bubbles, and forwarding mux selections.
+> **Note on Architecture Diagram:** The diagram reflects the original pre-bypass structure. The RTL in this directory modifies this baseline by bypassing the `EX/MEM` pipeline register for data memory access, using a synchronous-read memory block, and adding an `observe_out` probe port. These changes apply to all simulations to accommodate the native 1-cycle access latency of the Sky130 SRAM macro.
 
 **Key design decisions:**
 - **Branch resolution happens entirely in Execute** — target address (`PC + immediate`, not `PC + 4`) and comparison both computed there, feeding back directly to `pc_logic`. Keeps the pipeline register field lists contained; no early-resolution optimization attempted.
@@ -41,7 +41,7 @@ Classic 5-stage in-order pipeline: **Fetch → Decode → Execute → Memory →
 
 **Forwarding priority, and why the order matters:** EX/MEM is checked before MEM/WB. If both stages happen to hold results destined for the same register simultaneously, the EX/MEM value is more recent (it's from a later instruction in program order) — checking MEM/WB first would forward a stale value.
 
-**x0 guard, applied everywhere a register-number comparison could produce a false positive:** the register file, hazard detection unit, and forwarding unit all explicitly exclude `rd_addr == 0` from triggering their respective logic. Necessary because `x0` appears constantly as an operand in ordinary code — without the guard, hazard/forwarding logic would trigger on every such instruction for no reason, a real (if non-corrupting) performance cost.
+**x0 guard, applied everywhere a register-number comparison could produce a false positive:** the register file, hazard detection unit, and forwarding unit all explicitly exclude `rd_addr == 0` from triggering their respective logic. Necessary because `x0` appears constantly as an operand in ordinary code.
 
 ## Hazard-Scenario Checklist
 
@@ -64,11 +64,15 @@ Verified through a full-pipeline test program exercising every case in one seque
 | Metric | Value |
 |---|---|
 | Instructions retired | 10 |
-| Total active cycles | 16 |
+| Total active cycles | 17 |
 | Stall cycles | 1 |
-| Measured CPI | 1.60 |
+| Flush bubbles | 2 (derived from taken branches × 2) |
+| Measured CPI | 1.70 |
 
-**Context for the CPI figure:** ideal pipelined CPI is 1.0. The program fetches 11 instructions in total — the 10 that retire, plus one instruction fetched behind a taken branch before being flushed. A zero-hazard run of 11 back-to-back instructions through a 5-stage pipeline takes 15 cycles (11 instructions plus 4 cycles to fill the pipeline). The measured 16 cycles is exactly one cycle more, matching the single reported stall — the load-use hazard, the one case forwarding cannot resolve on its own. The branch flush contributes no additional cycles: the flushed instruction was already occupying a pipeline slot regardless of the branch outcome; flushing only prevents it from committing its effects. CPI is computed against the 10 retired instructions (16 / 10 = 1.60).
+**Context for the metrics:**
+
+* **17 Cycles:** Defines the execution duration of the program trace, measured from the clock edge where reset is released until the clock edge where the final instruction (writing to `x6`) successfully completes its write-back stage.
+* **CPI (1.70):** Ideal pipelined CPI is 1.0. A zero-hazard run of 10 instructions through a 5-stage pipeline takes 14 cycles (10 instructions plus 4 cycles to fill the pipeline). The measured 17 cycles accounts for the overhead of this specific implementation: one load-use stall plus two flush bubbles from the taken branch (a consequence of the design choice to resolve branches in the EX stage). CPI is computed against the 10 retired instructions (17 / 10 = 1.70) in this directed test, rather than a generalized benchmark.
 
 ## Verification Approach
 
@@ -91,16 +95,14 @@ riscv_pipeline/
 └── run_all_tests.sh     # Global 18-test regression suite runner
 ```
 
-Each subdirectory contains its module(s), a self-checking testbench, and a sim_*.sh script to compile and run it independently. `run_all_tests.sh` at the repo root runs the full regression suite across all of them in pipeline order.
-
 ## How to Run
 
-**Individual module tests:** from within any subdirectory, `./sim_<module>.sh`
+> **Note:** Simulating the data memory and core integration tests on this branch requires the OpenRAM Sky130 SRAM macro Verilog model. The `SKY130_SRAM_PATH` environment variable must point directly to the `.v` file. Without this macro, exactly 2 of the 18 tests will fail.
 
-**Full regression suite:** `./run_all_tests.sh` from the `riscv_pipeline` root — runs all module-level testbenches in pipeline order and reports pass/fail per module plus an aggregate summary.
-
-**Full pipeline integration test:** `cd core && ./sim_core.sh`
+* **Individual module tests:** from within any subdirectory, `./sim_<module>.sh`
+* **Full regression suite:** `./run_all_tests.sh` from the `riscv_pipeline` root — runs all module-level testbenches in pipeline order and reports pass/fail per module plus an aggregate summary.
+* **Full pipeline integration test:** `cd core && ./sim_core.sh`
 
 ## Portfolio Statement
 
-*My RV32I pipeline implements a 5-stage in-order datapath with hardware forwarding (EX/MEM and MEM/WB paths, correctly prioritized), a dedicated load-use hazard detection unit, and control-hazard flushing — verified through per-module self-checking testbenches plus a full-pipeline integration test exercising every hazard type in a single 10-instruction sequence, achieving a measured CPI of 1.60 with only the architecturally unavoidable load-use stall contributing overhead.*
+My RV32I pipeline implements a 5-stage in-order datapath with hardware forwarding (EX/MEM and MEM/WB paths, correctly prioritized), a dedicated load-use hazard detection unit, and control-hazard flushing — verified through per-module self-checking testbenches plus a full-pipeline integration test exercising every hazard type in a single sequence, achieving a measured CPI of 1.70 on a 10-instruction directed test.

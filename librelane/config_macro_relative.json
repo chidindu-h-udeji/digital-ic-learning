@@ -1,0 +1,47 @@
+{
+  "DESIGN_NAME": "riscv_core",
+  "VERILOG_FILES": [
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/core/riscv_core.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/forwarding_unit/forwarding_unit.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/if_stage/instruction_memory.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/if_stage/if_stage.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/if_stage/pc_logic.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/id_stage/id_stage.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/id_stage/imm_gen.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/id_stage/control_unit.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/mem_stage/mem_stage.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/mem_stage/data_memory.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/register_file/register_file.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/ex_stage/ex_stage.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/pipeline_regs/mem_wb_reg.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/pipeline_regs/id_ex_reg.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/pipeline_regs/ex_mem_reg.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/pipeline_regs/if_id_reg.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/hazard_unit/hazard_unit.sv",
+    "/home/chidindu/digital-ic-learning/rtl_projects/riscv_pipeline/wb_stage/wb_stage.sv"
+  ],
+  "EXTRA_VERILOG_MODELS": [
+    "/home/chidindu/digital-ic-learning/librelane/sram_bb.v"
+  ],
+  "EXTRA_LEFS": [
+    "/home/chidindu/digital-ic-learning/sky130_sram_macros/sky130_sram_1kbyte_1rw1r_32x256_8/sky130_sram_1kbyte_1rw1r_32x256_8.lef"
+  ],
+  "EXTRA_LIBS": [
+    "/home/chidindu/digital-ic-learning/sky130_sram_macros/sky130_sram_1kbyte_1rw1r_32x256_8/sky130_sram_1kbyte_1rw1r_32x256_8_TT_1p8V_25C.lib"
+  ],
+  "EXTRA_GDS_FILES": [
+    "/home/chidindu/digital-ic-learning/sky130_sram_macros/sky130_sram_1kbyte_1rw1r_32x256_8/sky130_sram_1kbyte_1rw1r_32x256_8.gds"
+  ],
+  "VERILOG_DEFINES": [
+    "__pnr__"
+  ],
+  "CLOCK_PORT": "clk",
+  "FP_SIZING": "relative",
+  "PL_TARGET_DENSITY": 0.45,
+  "FP_CORE_UTIL": 45,
+  "MACRO_PLACEMENT_CFG": "/home/chidindu/digital-ic-learning/librelane/macro_placement.cfg",
+  "FP_PDN_MACRO_HOOKS": [
+    "mem_stage_inst.dmem.data_mem_macro vccd1 vssd1 vccd1 vssd1"
+  ],
+  "CLOCK_PERIOD": 20
+}

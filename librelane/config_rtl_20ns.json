@@ -1,0 +1,6 @@
+{
+  "DESIGN_NAME": "riscv_core",
+  "VERILOG_FILES": "dir::*.sv",
+  "CLOCK_PERIOD": 20,
+  "CLOCK_PORT": "clk"
+}
