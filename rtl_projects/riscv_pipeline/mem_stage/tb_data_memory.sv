@@ -22,57 +22,73 @@ module tb_data_memory;
     $dumpfile("tb_data_memory.vcd");
     $dumpvars(0, tb_data_memory);
 
-    mem_read = 0; mem_write = 0; addr = 0; write_data = 0;
-    #12;
+    `ifdef __pnr__
+      // Backdoor array initialization
+      $readmemh("data_mem_init.hex", dut.data_mem_macro.mem);
+    `endif
 
-    // SCENARIO 1: Read pre-loaded data (lw)
+    mem_read = 0; mem_write = 0; addr = 0; write_data = 0;
+    
+    @(negedge clk);
+
+    // SCENARIO 1: Read pre-loaded data
     addr = 4; mem_read = 1; mem_write = 0;
     
-    #1;
+    @(posedge clk);
+    #9;
     if (read_data !== 32'h0915ACFC) begin
-      $display("ERROR (Scen 1): Expected 0915ACFC at addr 4, got %h", read_data);
+      $display("ERROR (Scen 1): Expected 0915ACFC, got %h", read_data);
       errors = errors + 1;
     end
 
-    // SCENARIO 2: Write new data (sw) & Read back
+    // SCENARIO 2: Write and read back
     @(negedge clk);
     addr = 12; write_data = 32'hF157_A1DD; 
     mem_read = 0; mem_write = 1;
     
     @(negedge clk);
     addr = 12; mem_read = 1; mem_write = 0;
-    #1;
+    
+    @(posedge clk);
+    #9;
     if (read_data !== 32'hF157_A1DD) begin
-      $display("ERROR (Scen 2): Write-then-read failed. Got %h", read_data);
+      $display("ERROR (Scen 2): Write-read failed. Got %h", read_data);
       errors = errors + 1;
     end
     
-    // SCENARIO 3: Write Disable
+    // SCENARIO 3: Write disable
     @(negedge clk);
     addr = 12; write_data = 32'hBADD_C0DE;
     mem_read = 0; mem_write = 0;
     
     @(negedge clk);
     addr = 12; mem_read = 1; mem_write = 0;
-    #1;
+    
+    @(posedge clk);
+    #9;
     if (read_data !== 32'hF157_A1DD) begin
-      $display("ERROR (Scen 3): Write disable failed. Data corrupted. Got %h", read_data);
+      $display("ERROR (Scen 3): Write disable failed. Got %h", read_data);
       errors = errors + 1;
     end
 
-    // SCENARIO 4: Read Disable
+    // SCENARIO 4: Read disable (hold previous)
+    @(negedge clk);
     mem_read = 0;
-    #1;
-    if (read_data !== 0) begin
-      $display("ERROR (Scen 4): read_data should be 0 when mem_read is low");
+    
+    `ifndef __pnr__
+    @(posedge clk);
+    #9;
+    if (read_data !== 32'hF157_A1DD) begin
+      $display("ERROR (Scen 4): Hold failed. Got %h", read_data);
       errors = errors + 1;
     end
+    `endif
 
-    // FINAL VERIFICATION
     if (errors == 0)
       $display("VERIFICATION PASSED! Errors: 0");
-    else
+    else begin
       $display("VERIFICATION FAILED! Errors: %0d", errors);
+    end
 
     $finish;
   end

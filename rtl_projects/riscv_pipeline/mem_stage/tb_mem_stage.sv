@@ -32,16 +32,22 @@ module tb_mem_stage;
 
     alu_result_in = 0; rs2_data_in = 0; rd_addr_in = 0;
     mem_read_in = 0; mem_write_in = 0; mem_to_reg_in = 0; reg_write_in = 0;
-    #12;
+    
+    @(negedge clk);
+    @(negedge clk);
+
+    // Write known value to memory for test reliability
+    alu_result_in = 28; rs2_data_in = 32'h6600AA11;
+    mem_read_in = 0; mem_write_in = 1; mem_to_reg_in = 0; reg_write_in = 0;
 
     // SCENARIO 1: Passthrough check & Memory Read
-    alu_result_in = 0; 
-    rs2_data_in = 32'hFADA_FADA;
-    rd_addr_in = 15;
+    @(negedge clk);
+    alu_result_in = 28; rd_addr_in = 15;
     mem_read_in = 1; mem_write_in = 0; mem_to_reg_in = 1; reg_write_in = 1;
     
+    @(posedge clk);
     #1;
-    if (read_data_out !== 32'h6600AA11 || alu_result_out !== 0 || rd_addr_out !== 15 || mem_to_reg_out !== 1 || reg_write_out !== 1) begin
+    if (read_data_out !== 32'h6600AA11 || alu_result_out !== 28 || rd_addr_out !== 15 || mem_to_reg_out !== 1 || reg_write_out !== 1) begin
       $display("ERROR (Scen 1): Passthrough or memory read failed.");
       errors = errors + 1;
     end
@@ -55,6 +61,8 @@ module tb_mem_stage;
     
     @(negedge clk);
     alu_result_in = 8; mem_read_in = 1; mem_write_in = 0;
+    
+    @(posedge clk);
     #1;
     if (read_data_out !== 32'hBABA_BABA || alu_result_out !== 8 || rd_addr_out !== 20 || mem_to_reg_out !== 0 || reg_write_out !== 0) begin
       $display("ERROR (Scen 2): Write-then-read through wrapper failed.");
@@ -62,10 +70,13 @@ module tb_mem_stage;
     end
 
     // SCENARIO 3: Read Disable
+    @(negedge clk);
     mem_read_in = 0;
+    
+    @(posedge clk);
     #1;
-    if (read_data_out !== 0) begin
-      $display("ERROR (Scen 3): read_data_out should be 0 when mem_read_in is low");
+    if (read_data_out !== 32'hBABA_BABA) begin
+      $display("ERROR (Scen 3): read_data_out should hold previous value when mem_read_in is low");
       errors = errors + 1;
     end
 

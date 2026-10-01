@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")" || exit 1
 echo "========================================"
 echo " Starting RISC-V Pipeline Regression"
 echo "========================================"
@@ -6,21 +7,32 @@ declare -a scripts=("if_stage/sim_pc.sh" "if_stage/sim_imem.sh" "if_stage/sim_if
 errors=0
 total=${#scripts[@]}
 for script in "${scripts[@]}"; do
-    dir=$(dirname "$script")
-    cmd=$(basename "$script")
     if [ -f "$script" ]; then
-        cd "$dir" || exit
+        dir=$(dirname "$script")
+        cmd=$(basename "$script")
+        cd "$dir" || exit 1
         output=$(./"$cmd" 2>&1)
         code=$?
-        cd - > /dev/null || exit
-        if [ $code -ne 0 ] || echo "$output" | grep -qiE "failed|error[^s]|errors: [1-9]"; then
+        cd - > /dev/null || exit 1
+        
+        zero_count=$(echo "$output" | grep -c "Errors: 0")
+        expected=1
+        if [[ "$script" == *"sim_core.sh"* ]]; then expected=2; fi
+        if [[ "$script" == *"sim_data_memory.sh"* ]]; then expected=2; fi
+        
+        fail=0
+        if [ $code -ne 0 ]; then fail=1; fi
+        if echo "$output" | grep -qE "Errors: [1-9]"; then fail=1; fi
+        if [ "$zero_count" -ne "$expected" ]; then fail=1; fi
+        
+        if [ $fail -eq 1 ]; then
             echo "❌ FAILED: $script"
             errors=$((errors + 1))
         else
             echo "✅ PASSED: $script"
         fi
     else
-        echo "⚠️  WARNING: Could not find $script"
+        echo "⚠  WARNING: Could not find $script"
         errors=$((errors + 1))
     fi
 done
