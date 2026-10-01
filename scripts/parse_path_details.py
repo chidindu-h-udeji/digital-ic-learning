@@ -8,7 +8,7 @@ OpenLane Timing Report Parser
 Takes an OpenLane .rpt file, extracts the startpoint, endpoint, 
 slack, and status of every timing path, and outputs a formatted 
 terminal summary and a results.csv file.
-Usage: python3 parse_timing.py <filepath>
+Usage: python3 parse_path_details.py <filepath>
 """
 
 def parse_timing_report(filepath):
