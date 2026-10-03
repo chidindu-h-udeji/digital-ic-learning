@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 
 module riscv_core (
-  input  logic clk,
-  input  logic reset,
-  output logic [31:0] observe_out
+  input  logic        clk,
+  input  logic        reset,
+  output logic [31:0] probe_out
 );
 
   // ----------------------------------------------------------------------
@@ -40,7 +40,9 @@ module riscv_core (
   logic [31:0] mem_alu_result, mem_rs2_data;
 
   // MEM Stage Wires
-  logic [31:0] mem2wb_read_data;
+  logic        mem2wb_mem_to_reg, mem2wb_reg_write;
+  logic [4:0]  mem2wb_rd_addr;
+  logic [31:0] mem2wb_read_data, mem2wb_alu_result;
 
   // MEM/WB Register Wires
   logic        wb_reg_write, wb_mem_to_reg;
@@ -227,10 +229,10 @@ module riscv_core (
     .mem_to_reg_in(ex_mem_to_reg),
     .reg_write_in(ex_reg_write),
     .alu_result_out(mem_alu_result),
-    .rs2_data_out(),                       // Unused: bypassed directly to MEM stage
+    .rs2_data_out(mem_rs2_data),
     .rd_addr_out(mem_rd_addr),
-    .mem_read_out(),                       // Unused: bypassed directly to MEM stage
-    .mem_write_out(),                      // Unused: bypassed directly to MEM stage
+    .mem_read_out(mem_mem_read),
+    .mem_write_out(mem_mem_write),
     .mem_to_reg_out(mem_mem_to_reg),
     .reg_write_out(mem_reg_write)
   );
@@ -240,18 +242,18 @@ module riscv_core (
   // ----------------------------------------------------------------------
   mem_stage mem_stage_inst (
     .clk(clk),
-    .alu_result_in(ex_alu_result),         // Bypassed EX/MEM reg for SRAM timing
-    .rs2_data_in(forwarded_rs2_data),      // Bypassed EX/MEM reg for SRAM timing
+    .alu_result_in(mem_alu_result),
+    .rs2_data_in(mem_rs2_data),
     .rd_addr_in(mem_rd_addr),
-    .mem_read_in(ex_mem_read),             // Bypassed EX/MEM reg for SRAM timing
-    .mem_write_in(ex_mem_write),           // Bypassed EX/MEM reg for SRAM timing
+    .mem_read_in(mem_mem_read),
+    .mem_write_in(mem_mem_write),
     .mem_to_reg_in(mem_mem_to_reg),
     .reg_write_in(mem_reg_write),
     .read_data_out(mem2wb_read_data),
-    .alu_result_out(),                     // Ignored: prevents pipeline skew
-    .rd_addr_out(),                        // Ignored: prevents pipeline skew
-    .mem_to_reg_out(),                     // Ignored: prevents pipeline skew
-    .reg_write_out()                       // Ignored: prevents pipeline skew
+    .alu_result_out(mem2wb_alu_result),
+    .rd_addr_out(mem2wb_rd_addr),
+    .mem_to_reg_out(mem2wb_mem_to_reg),
+    .reg_write_out(mem2wb_reg_write)
   );
 
   // MEM/WB Pipeline Register
@@ -259,10 +261,10 @@ module riscv_core (
     .clk(clk),
     .reset(reset),
     .read_data_in(mem2wb_read_data),
-    .alu_result_in(mem_alu_result),        // Sync control from EX/MEM
-    .rd_addr_in(mem_rd_addr),              // Sync control from EX/MEM
-    .mem_to_reg_in(mem_mem_to_reg),        // Sync control from EX/MEM
-    .reg_write_in(mem_reg_write),          // Sync control from EX/MEM
+    .alu_result_in(mem2wb_alu_result),
+    .rd_addr_in(mem2wb_rd_addr),
+    .mem_to_reg_in(mem2wb_mem_to_reg),
+    .reg_write_in(mem2wb_reg_write),
     .read_data_out(wb_read_data),
     .alu_result_out(wb_alu_result),
     .rd_addr_out(wb_rd_addr),
@@ -284,5 +286,6 @@ module riscv_core (
     .reg_write_out(wb_final_reg_write)
   );
 
-  assign observe_out = wb_write_back_data;
+  assign probe_out = wb_write_back_data;
+
 endmodule

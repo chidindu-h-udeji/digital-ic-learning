@@ -3,13 +3,29 @@ import json
 import os
 
 def load_metrics(run_dir):
-    # Try appending final/metrics.json, otherwise assume they passed the file directly
-    metrics_path = os.path.join(run_dir, "final", "metrics.json")
-    if not os.path.exists(metrics_path):
+    # Handle direct file paths or directory fallbacks
+    if run_dir.endswith('.json'):
         metrics_path = run_dir
-        
+    else:
+        metrics_path = os.path.join(run_dir, "metrics.json")
+        if not os.path.exists(metrics_path):
+            metrics_path = os.path.join(run_dir, "final", "metrics.json")
+    
+    if not os.path.exists(metrics_path):
+        print(f"Error: Could not find metrics.json in {run_dir}")
+        sys.exit(1)
+
     with open(metrics_path, 'r') as f:
         return json.load(f)
+
+def get_run_name(path):
+    # Extract directory name, stepping back if path ends in 'final' or 'metrics.json'
+    path = path.rstrip('/')
+    if path.endswith('.json'):
+        path = os.path.dirname(path)
+    if path.endswith('final'):
+        path = os.path.dirname(path)
+    return os.path.basename(path)
 
 def main():
     if len(sys.argv) != 3:
@@ -19,6 +35,10 @@ def main():
     # Load both runs
     metrics1 = load_metrics(sys.argv[1])
     metrics2 = load_metrics(sys.argv[2])
+
+    # Extract dynamic column headers
+    run1_name = get_run_name(sys.argv[1])
+    run2_name = get_run_name(sys.argv[2])
 
     # Define the fields we want to extract
     keys_to_compare = [
@@ -31,7 +51,7 @@ def main():
     ]
 
     # Print Header
-    print(f"\n{'Metric':<25} | {'Run 1 (20ns)':<15} | {'Run 2 (35ns)':<15}")
+    print(f"\n{'Metric':<25} | {run1_name:<15} | {run2_name:<15}")
     print("-" * 62)
 
     # Print Table Rows
@@ -56,10 +76,12 @@ def main():
 
     util1 = round(float(metrics1.get("design__instance__utilization", 0)), 4)
     util2 = round(float(metrics2.get("design__instance__utilization", 0)), 4)
-    if util1 == util2:
-        print("[PASS] Logic Utilization remained constant.")
+    
+    # Introduce a 0.001 tolerance (0.1%) to pass minor placement density variations
+    if abs(util1 - util2) <= 0.001:
+        print("[PASS] Logic Utilization remained stable.")
     else:
-        print("[WARN] Utilization changed unexpectedly!")
+        print(f"[WARN] Utilization changed unexpectedly! ({util1} vs {util2})")
     print()
 
 if __name__ == '__main__':

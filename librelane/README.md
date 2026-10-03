@@ -1,138 +1,89 @@
-# RISC-V Pipeline: RTL-to-GDS Physical Implementation
+# Sky130 ASIC Flow — RISC-V Core & Safety Monitor
 
-## Overview
+This directory documents taking the [RISC-V pipelined processor](../rtl_projects/riscv_pipeline/) through an RTL-to-GDS physical design flow using **LibreLane** on the open-source **Sky130 PDK**.
 
-This directory documents taking the [RISC-V pipelined processor](../rtl_projects/riscv_pipeline/) through a complete RTL-to-GDS physical design flow using **LibreLane** (the actively-maintained successor to OpenLane 2) on the open-source **Sky130 PDK**. The design was run at two clock constraints deliberately, to produce a real comparison rather than a single pass/fail result.
-
-A smaller design (the [Safety Monitor FSM](../rtl_projects/safety_monitor/)) was run through the same flow first, as a toolchain validation step — confirming the install and flow mechanics worked before risking the main portfolio design on it.
+A smaller design (the [Safety Monitor FSM](../rtl_projects/safety_monitor/)) was run through the same flow first, as a toolchain validation step. *(Run executed locally; metrics not committed).*
 
 ## Toolchain
 
-- **LibreLane** — RTL-to-GDS flow (synthesis → floorplan → placement → CTS → routing → signoff), installed via Nix
-- **Sky130 PDK** — SkyWater/Google's open-source 130nm process, fetched automatically via Volare on first run
-- **OpenROAD, Yosys, Magic, KLayout, netgen** — invoked internally by the flow for placement/routing, synthesis, layout, and LVS respectively
+* **LibreLane** — RTL-to-GDS flow (synthesis → floorplan → placement → CTS → routing → signoff), installed via Nix
+* **Sky130 PDK** — SkyWater/Google's open-source 130nm process, fetched automatically via Volare
+* **OpenROAD, Yosys, Magic, KLayout, netgen** — invoked internally by the flow for placement/routing, synthesis, layout, and LVS
 
 ## Run 1 — Safety Monitor FSM (Toolchain Validation)
 
-Small, already-verified design, run first to confirm the flow itself worked correctly.
-
-| Metric | Value |
-|---|---|
-| Instance area | 1,745.42 µm² |
-| Die area | 3,512.12 µm² |
-| Utilization | 37.6% |
+| Metric            | Value                                        |
+| ----------------- | -------------------------------------------- |
+| Instance area     | 1,745.42 µm²                                 |
+| Die area          | 3,512.12 µm²                                 |
+| Utilization       | 37.6%                                        |
 | Worst setup slack | +12.99 ns (comfortable margin at 20ns/50MHz) |
-| Result | 80/80 stages, zero errors |
+| Result            | 80/80 stages, zero errors                    |
 
-## Run 2 — RISC-V Core: Two Clock Constraints
+## Run 2 — RISC-V Core: Baseline vs. SRAM Macro Integration
 
-### Configuration
+The 5-stage RV32I core was evaluated under multiple constraints and physical architectures.
 
-```json
-{
-  "DESIGN_NAME": "riscv_core",
-  "VERILOG_FILES": "dir::*.sv",
-  "CLOCK_PERIOD": 20,
-  "CLOCK_PORT": "clk"
-}
-```
+**RTL Identity & Simulation Note:**
 
-Run at `CLOCK_PERIOD` 20ns and, separately, 35ns, under run tags `RUN_2026-08-27_03-50-42` and `riscv_relaxed`.
+* **RTL Baseline:** 17 of the module files match `main` at commit `8f67a7e`. The top-level file used for baseline physical design is `riscv_core_baseline.sv`, which differs only by adding a `probe_out` port.
+* **Macro Sourcing:** The SRAM Macro runs utilize a modified RTL branch featuring an `observe_out` port, synchronous-read memory, and an `EX/MEM` pipeline register bypass to accommodate the native 1-cycle access latency of the Sky130 SRAM macro. `SKY130_SRAM_PATH` must point directly to the simulation `.v` file (not the directory). The SRAM macros were obtained from the open-source `sky130_sram_macros` repository.
+* Passing the 18-test regression suite requires the vendor macro simulation model (`sky130_sram_1kbyte_1rw1r_32x256_8`). A skipped macro simulation will fail the runner.
 
 ### Results Summary
 
-| Metric | 20ns (50MHz) | 35ns (28.6MHz) |
-|---|---|---|
-| Worst setup slack (WNS) | **−4.7874 ns — FAILED** | **+8.9032 ns — PASSED** |
-| Max slew violations | 16,712 | 16,777 |
-| Max cap violations | 110 | 108 |
-| Max fanout violations | 446 | 448 |
-| Die area | 762,310 µm² | 762,310 µm² |
-| Utilization | 74.21% | 74.21% |
-| DRC / LVS / Antenna | DRC passed | All three passed |
+| **Metric**                          | **20ns RTL Baseline** | **20ns with SRAM Macro (Relative Floorplan)** | **20ns with SRAM Macro (Absolute Floorplan)** | **35ns RTL Baseline** | **35ns with SRAM Macro (Absolute Floorplan)** |
+| ----------------------------------- | :-------------------: | :-------------------------------------------: | :-------------------------------------------: | :-------------------: | :-------------------------------------------: |
+| **Setup WNS (ns)**                  |  −4.79 (**FAILED**)   |              −4.62 (**FAILED**)               |              −3.36 (**FAILED**)               |  +8.90 (**PASSED**)   |              +8.15 (**PASSED**)               |
+| **Max Slew Violations**             |        16,712         |                     1,940                     |                     2,138                     |        16,777         |                     2,217                     |
+| **Max Cap Violations**              |          110          |                      15                       |                      41                       |          108          |                      39                       |
+| **Max Fanout Violations**           |          446          |                      56                       |                      16                       |          448          |                      15                       |
+| **Instance Area (std cells+macro)** |     ~543,000 µm²      |                 ~253,000 µm²                  |                 ~284,000 µm²                  |     ~543,000 µm²      |                 ~284,000 µm²                  |
+| **Die Area (µm²)**                  |        762,310        |                    541,770                    |          2,250,000 (Fixed 1500x1500)          |        762,310        |          2,250,000 (Fixed 1500x1500)          |
+| **Utilization**                     |        74.21%         |                    48.98%                     |                    12.92%                     |        74.21%         |                    12.93%                     |
+| **Magic DRC Errors**                |           0           |                   2,832,616                   |                   2,832,616                   |           0           |                   2,832,616                   |
+| **LVS / Antenna**                   |    Clean / 0 nets     |                Clean / 0 nets                 |                Clean / 0 nets                 |    Clean / 0 nets     |                Clean / 2 nets                 |
 
-Both runs completed all 80 flow stages with zero flow errors. Die area and utilization are identical between runs, as expected — only the timing constraint changed, not the netlist.
+### Key Technical Findings
 
-### Physical Layout
+1. **Fanout vs. Setup Causality:**
+   Initial physical synthesis revealed severe physical signal-integrity violations (slew, cap, and fanout) caused by synthesizing the memory into standard flip-flop arrays. Integrating the Sky130 1KB SRAM macro successfully dropped max fanout violations. The relative-area run demonstrates this: while it shrank the die by 28.9% and reduced max slew violations by 88% compared to the baseline, the 20ns setup timing still failed (−4.62ns WNS). This demonstrates that eliminating the heavy memory fanout loading was not sufficient to close setup timing at 50MHz.
 
-<img src="./runs/riscv_35ns/render/riscv_core.png" width="100%" alt="RISC-V core physical layout, 35ns constraint, DRC/LVS clean">
-
-*Rendered physical layout at the passing 35ns constraint — synthesis through detailed routing on the Sky130 process.*
-
-### Root Cause: Why the 20ns Run Failed
-
-Both memories in the design are declared as:
-```systemverilog
-logic [31:0] mem [0:255];
-```
-256 words × 32 bits = 8,192 bits per memory, implemented as ordinary flip-flops rather than a dedicated SRAM macro (none was targeted in this flow). Yosys synthesized each 32-bit memory as four 8-bit byte-lanes, each requiring one control signal to reach all 256 flip-flops in that lane: 256 × 8 = **2,048** — matching the four large-fanout nets flagged by the flow (`_09020_`, `_09026_`, `_09029_`, `_09033_`), corresponding to the two memories' two control signals each.
-
-A driver gate straining to drive 2,048 downstream loads produces a physically slow voltage transition (a **slew violation**) and excessive load capacitance (a **cap violation**) — independent of clock speed. At the worst-case PVT corner (`max_ss_100C_1v60` — slow silicon, 100°C, 1.60V), this physical strain pushed the critical path past the 20ns budget, producing the setup timing failure.
-
-### The Real Finding: Relaxing the Clock Fixed Timing, Not the Underlying Problem
-
-Comparing the two runs directly separates two categories of result that are easy to conflate:
-
-- **Setup timing (WNS)** measures whether a signal arrives before the clock edge that samples it — a *time-budget* question. Relaxing the clock from 20→35ns gave every path more time to arrive, which is why WNS flipped from failing to passing.
-- **Slew and capacitance violations** measure whether a driving gate is electrically strong enough for its physical load — independent of how much time is available. These counts stayed within noise across the two runs (16,712→16,777 slew, 110→108 cap, 446→448 fanout) despite a 75% increase in clock period and a ~13.7ns swing in WNS.
-
-**Relaxing the clock period closes setup timing but does not, and structurally cannot, resolve the underlying signal-integrity violations, since those stem from physical fanout loading rather than available time.** Fixing them would require reducing the actual load on the driving gates — real SRAM macros in place of flip-flop-based memory, buffer insertion, or fanout splitting — independent of clock speed entirely.
-
-### Clock Tree Delay Breakdown (Verified)
-
-Worst path in the 20ns run: `_37941_` → `_37919_`, at corner `max_ss_100C_1v60`.
-
-| Segment | Delay |
-|---|---|
-| Pad entry | 0.783 ns |
-| `clkbuf_0_clk` (size 16) | 0.799 ns |
-| `clkbuf_2_3_0_clk` (size 8) | 0.850 ns |
-| `clkbuf_6_55_0_clk` (size 8) | 0.555 ns |
-| *Cell delay subtotal* | *2.987 ns* |
-| `clknet_0` | 0.036 ns |
-| `clknet_2_3_0` | 0.052 ns |
-| `clknet_6_55_0` | 0.003 ns |
-| *Net delay subtotal* | *0.091 ns* |
-| **Total to 4th buffer's input pin** | **3.078 ns ≈ 3.079 ns reported** |
-
-Nearly 3ns of the worst path is spent purely distributing the clock — a direct consequence of the same dense, unmacroed memory grid discussed above: greater physical congestion means longer wires, which means more clock tree delay to reach every flip-flop.
+2. **Magic DRC Analysis on Macro Runs:**
+   The RTL baselines are perfectly DRC clean. Conversely, Magic reports 2,832,616 DRC errors on the SRAM macro runs (the top rules being `diff/tap.9` and `li.1`). Spatial bounding-box analysis confirms that all markers fall strictly within the vendor-provided SRAM macro's layout box (X: 150-629.78, Y: 150-547.5). While the core routing logic contains no markers outside the macro box, the runs themselves are not DRC-clean as built.
 
 ## Repository Structure
 
-```
+```text
 librelane/runs/
-├── riscv_20ns/          # Failing run — signoff artifacts trimmed to portfolio-relevant files
-│   ├── metrics.json / metrics.csv
-│   ├── render/riscv_core.png
-│   ├── sdc/, lef/, lib/, json_h/, vh/
-│   └── (no GDS — see note below)
-└── riscv_35ns/           # Passing run
-    ├── metrics.json / metrics.csv
-    ├── gds/riscv_core.gds   # Full physical layout
-    ├── render/riscv_core.png
-    └── sdc/, lef/, lib/, json_h/, vh/
+├── riscv_20ns/                  # RTL baseline
+├── riscv_35ns/                  # RTL baseline (Canonical GDS)
+├── riscv_macro_20ns/            # Macro integration (Absolute floorplan)
+├── riscv_macro_35ns/            # Macro integration (Absolute floorplan)
+└── riscv_macro_relative_area/   # Macro integration (Relative floorplan)
 ```
 
-Each run originally produced ~700MB of signoff data (`.sdf`, `.spef`, `.odb`, `.mag`, redundant GDS copies from three different tools). This was trimmed to the files that actually matter for review — metrics, constraints, physical abstracts, and one canonical GDS — rather than committing multi-corner timing/parasitic data nobody would open on GitHub. GDS was kept only for the 35ns (passing) run, since it's the stronger "here's a working chip" artifact; the 20ns run's story lives in its metrics and the analysis above.
+*(Run artifacts are trimmed to metrics and constraints to preserve repository size. Only the riscv_35ns baseline retains its canonical GDS).*
 
 ## How to Reproduce
 
+The macro simulation requires the OpenRAM-generated SRAM macros from the open-source sky130_sram_macros repository. It should be located at `<repo root>/sky130_sram_macros/` or linked via the `SKY130_SRAM_PATH` environment variable.
+
+**Macro File Hashes (SHA256):**
+
+* `.v`: `ecc3992c8232353517feeb4dedaa5bbae752216e7edc6d4f9f24cbb797316344`
+* `.lef`: `f5389fa908c5876ef034c487b4363e755b3e13bf88ba924815c6fcea17965b92`
+* `.gds`: `d342f811d3822b39e95c496739f511276146356ec00d2052ea663550cd293c1d`
+
 ```bash
-git clone https://github.com/librelane/librelane/ ~/librelane
-nix-shell ~/librelane/shell.nix
-librelane ~/my_designs/riscv_core/config.json
+# Parse timing and PPA metrics
+python3 scripts/parse_timing.py librelane/runs/riscv_35ns librelane/runs/riscv_macro_35ns
 ```
 
-`scripts/parse_timing.py` extends the earlier single-report parser (written for the Python gate condition) to accept two run directories and print a side-by-side comparison table with automated sanity checks (die area and utilization should remain constant across a pure constraint change):
+## Baseline Configs
 
-```bash
-python3 scripts/parse_timing.py librelane/runs/riscv_20ns openlane/runs/riscv_35ns
-```
-
-## Future Work
-
-Mapping both memories to real Sky130 SRAM macros (instead of flip-flop arrays) would directly address the fanout root cause identified above — this was deliberately not attempted here, since it requires macro blackboxing and LEF/GDS integration beyond this run's scope, and risked the project timeline for a result that isn't required to demonstrate the core RTL-to-GDS competency this run set out to show.
+> **Note:** These configurations are recorded for reference and are not directly runnable. The macro configurations use absolute paths tied to the original build environment, and the RTL configurations use `dir::*.sv` which resolves only to the baseline SV file in this directory.
 
 ## Portfolio Statement
 
-*Ran the RISC-V pipeline through the full LibreLane RTL-to-GDS flow on the Sky130 PDK at two clock constraints, diagnosed a hard timing failure to its physical root cause — flip-flop-based memory arrays driving 2,048-terminal fanout nets — and demonstrated quantitatively that relaxing the clock period closes setup timing without resolving the underlying signal-integrity violations, which remain unaffected by clock speed.*
+Ran the RISC-V pipeline through the LibreLane RTL-to-GDS flow on the Sky130 PDK. Identified severe slew and fanout violations caused by standard-cell memory arrays, integrated a Sky130 SRAM macro to reduce max fanout violations by 96% to 97% (using an absolute floorplan), and documented the Performance and Area impacts across multiple clock constraints—demonstrating that reducing physical routing strain was insufficient to close the 50MHz setup timing budget.

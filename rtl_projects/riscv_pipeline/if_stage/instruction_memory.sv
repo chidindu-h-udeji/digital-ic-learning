@@ -6,7 +6,7 @@ module instruction_memory (
 );
 
   // 1KB Memory Array: 256 words, each 32 bits wide
-  logic [31:0] mem [0:255];
+  (* keep = "true" *) logic [31:0] mem [0:255];
 
   // Load machine code from hex file at time zero
   // (Synthesizers recognize this as a request to initialize BRAM/ROM)
