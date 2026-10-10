@@ -1,6 +1,6 @@
 # RV32I 5-Stage Pipelined Processor
 
-A pipelined RISC-V (RV32I subset) processor implemented in SystemVerilog, featuring hardware forwarding, load-use hazard detection, and control-hazard flushing. Built module-by-module with self-checking testbenches at every stage — 13 independently verified modules, 18-instruction subset, culminating in a full-pipeline test exercising every hazard type simultaneously.
+A pipelined RISC-V (RV32I subset) processor implemented in SystemVerilog, featuring hardware forwarding, load-use hazard detection, and control-hazard flushing. Built module-by-module with self-checking testbenches at every stage — 13 independently verified modules, 18-instruction subset, culminating in a full-pipeline test exercising every hazard type simultaneously. (Note: The processor was developed as 13 primary functional blocks—register file, 5 stages, 4 pipeline registers, hazard unit, forwarding unit, and core—which comprise 18 total SystemVerilog module declarations.)
 
 ## Architecture
 

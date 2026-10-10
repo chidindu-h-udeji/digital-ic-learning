@@ -47,7 +47,7 @@ The 5-stage RV32I core was evaluated under multiple constraints and physical arc
 ### Key Technical Findings
 
 1. **Fanout vs. Setup Causality:**
-   Initial physical synthesis revealed severe physical signal-integrity violations (slew, cap, and fanout) caused by synthesizing the memory into standard flip-flop arrays. Integrating the Sky130 1KB SRAM macro successfully dropped max fanout violations. The relative-area run demonstrates this: while it shrank the die by 28.9% and reduced max slew violations by 88% compared to the baseline, the 20ns setup timing still failed (−4.62ns WNS). This demonstrates that eliminating the heavy memory fanout loading was not sufficient to close setup timing at 50MHz.
+   Initial physical synthesis revealed severe physical signal-integrity violations (slew, cap, and fanout) consistent with synthesizing the memory into standard flip-flop arrays. Integrating the Sky130 1KB SRAM macro was consistent with dropping max fanout violations. The relative-area run demonstrates this: while it shrank the die by 28.9% and reduced max slew violations by 88% compared to the baseline, the 20ns setup timing still failed (−4.62ns WNS). This demonstrates that eliminating the heavy memory fanout loading was not sufficient to close setup timing at 50MHz.
 
 2. **Magic DRC Analysis on Macro Runs:**
    The RTL baselines are perfectly DRC clean. Conversely, Magic reports 2,832,616 DRC errors on the SRAM macro runs (the top rules being `diff/tap.9` and `li.1`). Spatial bounding-box analysis confirms that all markers fall strictly within the vendor-provided SRAM macro's layout box (X: 150-629.78, Y: 150-547.5). While the core routing logic contains no markers outside the macro box, the runs themselves are not DRC-clean as built.
