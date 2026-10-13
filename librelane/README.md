@@ -86,4 +86,4 @@ python3 scripts/parse_timing.py librelane/runs/riscv_35ns librelane/runs/riscv_m
 
 ## Portfolio Statement
 
-Ran the RISC-V pipeline through the LibreLane RTL-to-GDS flow on the Sky130 PDK. Identified severe slew and fanout violations caused by standard-cell memory arrays, integrated a Sky130 SRAM macro to reduce max fanout violations by 96% to 97% (using an absolute floorplan), and documented the Performance and Area impacts across multiple clock constraints—demonstrating that reducing physical routing strain was insufficient to close the 50MHz setup timing budget.
+Ran the RISC-V pipeline through the LibreLane RTL-to-GDS flow on the Sky130 PDK. Identified severe slew and fanout violations consistent with standard-cell memory arrays, integrated a Sky130 SRAM macro to reduce max fanout violations by 96% to 97% (using an absolute floorplan), and documented the Performance and Area impacts across multiple clock constraints—demonstrating that reducing physical routing strain was insufficient to close the 50MHz setup timing budget.

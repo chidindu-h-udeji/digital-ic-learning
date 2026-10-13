@@ -19,7 +19,7 @@ The system is implemented as a 3-block Moore FSM with an integrated 10-cycle fau
 - **NORMAL (00):** System is idle. Sensors read safe levels. All outputs driven low.
 - **WARNING (01):** A single sensor detects elevated gas levels. The `buzzer` is triggered to alert personnel, but operations continue.
 - **ALARM (10) [The Grace Period]:** A critical threshold is breached. The system **latches** into this state, ensuring the buzzer sounds continuously to mandate human inspection even if the gas briefly clears. A 10-clock-cycle fault integration timer begins. 
-- **LOCKOUT (11) [The Mitigation State]:** If the fault counter saturates (indicating a persistent, dangerous gas leak for 10 clock cycles), the system enters a hard lockout. A physical `shutoff` signal is asserted to close physical valves and cut machine power. **This is a non-recoverable safety trap.** The system cannot exit this state—even if the gas completely clears—without a manual physical `reset` from a safety officer.
+- **LOCKOUT (11) [The Mitigation State]:** If the fault counter saturates (indicating 10 cycles with both sensors in alarm during one ALARM episode), the system enters a hard lockout. A physical `shutoff` signal is asserted to close physical valves and cut machine power. **This is a non-recoverable safety trap.** The system cannot exit this state—even if the gas completely clears—without a manual physical `reset` from a safety officer.
 
 ### Port Map
 
