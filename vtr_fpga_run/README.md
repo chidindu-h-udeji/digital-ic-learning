@@ -3,15 +3,15 @@
 This directory documents the Verilog-to-Routing (VTR) synthesis and routing flow for the 5-stage RISC-V core.
 
 ## Methodology & Design Caveats
-* **Memory Mapping:** Because the Sky130 ASIC SRAM macros cannot be mapped onto an FPGA, this run uses the behavioral synchronous-read data memory from the `main` branch (commit `3cb4f903adfc1562b1d81e761eea5af3b471e4dc`). These FPGA metrics represent a different physical mapping than the ASIC runs and should not be used as a direct 1-to-1 comparison.
+* **Memory Mapping:** Because the Sky130 ASIC SRAM macros cannot be mapped onto an FPGA, this run uses the behavioral synchronous-read data memory from the `main` branch. These FPGA metrics represent a different physical mapping than the ASIC runs and should not be used as a direct 1-to-1 comparison.
 * **Literal Initialization:** In this VTR build, `$readmemh` contents were not loaded during synthesis, resulting in the entire design being swept as dead logic. The `run_fpga_flow.sh` script applies a literal-initialization workaround inside a temporary `/tmp` directory. A testbench gate runs the repo's directed 17-cycle program on the synthesis-input RTL. However, VPR's RAM blocks carry no initial contents, so the final routed netlist itself is not functionally verified. The metrics below describe the core's structural logic plus three RAM blocks, not a CPU executing a specific program.
-* **Anti-Specialization Padding:** Synthesis tools aggressively fold logic if ROM columns are mathematically constant. An A/B test showed that the unmodified 11-instruction program (which leaves 14 ROM columns identically zero) yielded 612 LUTs at 124.49 MHz. Padding the unread end of the ROM with a `0xFFFFFFFF` dummy instruction stops this constant-column folding, resulting in the 914 LUTs at 103.18 MHz reported below.
+* **Anti-Specialization Padding:** Synthesis tools aggressively fold logic if ROM columns are mathematically constant. An A/B test showed that the unmodified 11-instruction program (which leaves 14 ROM columns identically zero) yielded 612 LUT primitives at 124.49 MHz. Padding the unread end of the ROM with a dummy `0xFFFFFFFF` instruction stops this constant-column folding, resulting in the 914 LUT primitives at 103.18 MHz reported below. The `PAD_ROM=1` option is enabled by default in the script.
 * **Constraints:** No explicit SDC file was provided. VPR was run with its default "run as fast as possible" constraint.
 
 ## VTR Environment
-* **Toolchain Hash:** `f3c7c118141257b7a916aa30f369deaf0c991738` (v9.0.0-candidate1-6662)
+* **Toolchain Hash:** `f3c7c118141257b7a916aa30f369deaf0c991738` (v9.0.0-candidate1-6662). The script requires a built VTR checkout at `$HOME/vtr-verilog-to-routing`.
 * **Architecture:** `EArch.xml` (VTR flagship timing architecture)
-* **Execution:** Run from the repository root using flags: `-top riscv_core -parser slang --route_chan_width 300`
+* **Execution:** Run from the repository root using flags: `-top riscv_core -parser slang --route_chan_width 300`. The anti-specialization padding can be disabled by prefixing `PAD_ROM=0`.
 
 ## Final Estimates
 * **Fmax (VPR default constraint):** 103.18 MHz
