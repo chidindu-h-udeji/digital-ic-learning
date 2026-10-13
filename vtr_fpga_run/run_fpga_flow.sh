@@ -9,7 +9,8 @@ VTR_ROOT="$HOME/vtr-verilog-to-routing"
 ARCH_FILE="$VTR_ROOT/vtr_flow/arch/timing/EArch.xml"
 
 echo "=== VTR FPGA Flow Build Script ==="
-echo "Commit: $COMMIT | PAD_ROM: $PAD_ROM"
+ACTUAL_COMMIT=$(git rev-parse "$COMMIT")
+echo "Commit: $ACTUAL_COMMIT | PAD_ROM: $PAD_ROM"
 
 if [ ! -d "$VTR_ROOT" ]; then
     echo "ERROR: Expected VTR checkout at $VTR_ROOT"
