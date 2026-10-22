@@ -1,0 +1,22 @@
+tree  1: different split features/thresholds, SAME node sizes and leaf values
+tree  3: different size (107 vs 109 nodes)
+tree  5: different split features/thresholds, SAME node sizes and leaf values
+tree  6: differs (node sizes equal: False, leaf diff 1.20e+00)
+tree  8: differs (node sizes equal: False, leaf diff 2.91e+00)
+tree 13: different split features/thresholds, SAME node sizes and leaf values
+tree 14: different split features/thresholds, SAME node sizes and leaf values
+tree 16: different split features/thresholds, SAME node sizes and leaf values
+tree 17: differs (node sizes equal: False, leaf diff 2.72e+00)
+tree 19: different split features/thresholds, SAME node sizes and leaf values
+tree 20: different split features/thresholds, SAME node sizes and leaf values
+tree 22: different split features/thresholds, SAME node sizes and leaf values
+tree 23: differs (node sizes equal: False, leaf diff 1.32e-01)
+tree 24: differs (node sizes equal: False, leaf diff 2.47e+00)
+tree 25: differs (node sizes equal: False, leaf diff 3.62e+00)
+tree 26: differs (node sizes equal: False, leaf diff 5.21e-01)
+tree 28: different split features/thresholds, SAME node sizes and leaf values
+tree 29: different split features/thresholds, SAME node sizes and leaf values
+
+identical (within 1e-9): 12
+different splits, same node sizes/values: 10
+genuinely different: 8

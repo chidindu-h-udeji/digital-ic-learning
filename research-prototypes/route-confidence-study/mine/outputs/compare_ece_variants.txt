@@ -1,0 +1,8 @@
+[train]
+  bins=10   top-label 0.0503   positive-class 0.0511
+  bins=20   top-label 0.0503   positive-class 0.0511
+  bins=50   top-label 0.0503   positive-class 0.0511
+[test]
+  bins=10   top-label 0.0293   positive-class 0.0379
+  bins=20   top-label 0.0359   positive-class 0.0486
+  bins=50   top-label 0.0410   positive-class 0.0520

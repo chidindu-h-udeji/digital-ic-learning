@@ -1,0 +1,6 @@
+rows: 182654
+acc    mine 0.790588  key 0.790588  diff +0.000000
+mcc    mine 0.608475  key 0.608475  diff +0.000000
+ece    mine 0.055009  key 0.055009  diff +0.000000
+brier  mine 0.139459  key 0.139459  diff +0.000000
+nll    mine 0.419692  key 0.419692  diff +0.000000

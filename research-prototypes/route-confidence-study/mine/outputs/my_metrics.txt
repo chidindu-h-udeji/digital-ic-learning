@@ -1,0 +1,34 @@
+--- self-tests (hand-worked examples) ---
+PASS  Brier, 10-prediction example       got 0.140870  want 0.140870
+PASS  NLL, 10-prediction example         got 0.426005  want 0.426000
+PASS  ECE positive-class, 2 bins         got 0.063000  want 0.063000
+PASS  ECE top-label, 2 bins              got 0.063000  want 0.063000
+PASS  ECE calibrated (0.9, 90% right)    got 0.000000  want 0.000000
+PASS  MoE interpolation, limit 120       got 0.620000  want 0.620000
+PASS  MoE exact threshold 300 -> f6      got 0.330000  want 0.330000
+PASS  accuracy, always-negative (73/27)  got 0.730000  want 0.730000
+PASS  MCC, always-negative               got 0.000000  want 0.000000
+PASS  MoE limit 75 (midpoint)            got 0.400000  want 0.400000
+PASS  MoE limit 975 (midpoint)           got 0.600000  want 0.600000
+PASS  midpoint = plain mean              got 0.600000  want 0.600000
+PASS  hard predictor: ECE = error rate   got 0.196400  want 0.196400
+PASS  hard predictor: Brier = error rate got 0.196400  want 0.196400
+PASS  hard predictor: NLL = err*34.54    got 6.783416  want 6.783416
+
+--- check against the artifact, threshold 500 (../artifact/MLCAD24_paper87_risk_management/src_and_data/Table2_Table3_Figure3/preds_500.npz) ---
+[train]  N = 427560
+PASS  train ECE                          got 0.050266  want 0.050266
+PASS  train Brier                        got 0.030480  want 0.030480
+PASS  train NLL                          got 0.123762  want 0.123762
+PASS  train accuracy                     got 0.964127  want 0.964127
+PASS  train MCC                          got 0.892983  want 0.892983
+        TN 329042  FP 6286  FN 9052  TP 83180
+[test]  N = 185921
+PASS  test ECE                           got 0.035875  want 0.035875
+PASS  test Brier                         got 0.135705  want 0.135705
+PASS  test NLL                           got 0.414942  want 0.414942
+PASS  test accuracy                      got 0.797005  want 0.797005
+PASS  test MCC                           got 0.607185  want 0.607185
+        TN 72995  FP 27304  FN 10437  TP 75185
+
+ALL PASS

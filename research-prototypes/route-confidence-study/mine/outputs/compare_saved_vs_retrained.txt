@@ -1,0 +1,9 @@
+[train] labels equal: True   max |p_retrained - p_saved| = 0.000000
+[test] labels equal: True   max |p_retrained - p_saved| = 0.111439
+
+saved model on test vs the key's threshold-500 row:
+  ece    mine 0.035891  key 0.035891  diff +0.000000
+  brier  mine 0.135924  key 0.135924  diff +0.000000
+  nll    mine 0.415507  key 0.415507  diff +0.000000
+  acc    mine 0.796403  key 0.796403  diff +0.000000
+  mcc    mine 0.606201  key 0.606201  diff +0.000000

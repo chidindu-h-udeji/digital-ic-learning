@@ -1,0 +1,5 @@
+artifact/
+mine/__pycache__/
+nohup.out
+*.npz
+*.joblib

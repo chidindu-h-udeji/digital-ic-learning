@@ -1,0 +1,4 @@
+points: 19
+time RMSE (h):  conf 94.5   expt 201.9   ratio 2.14
+mean signed error (h):  conf -84.6   expt +132.7
+paper: 143 h vs 273 h, ratio 1.91

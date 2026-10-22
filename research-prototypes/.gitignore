@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+_review/
+make_review_bundle.py
+sweep_work/
+build*/
+obj_dir/
+*.vcd
+*.npz
+*.joblib
+nohup.out
+artifact/
+*.zip

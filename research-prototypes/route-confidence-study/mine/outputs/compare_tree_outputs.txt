@@ -1,0 +1,6 @@
+[train] 19783 rows from ['CHERI-500-1_train_X.csv', 'CH_DFSIN-500-1_train_X.csv', 'EKF-SLAM_Jacobians-500-1_train_X.csv']
+  trees whose outputs differ on these rows: none
+  ensemble raw-score max diff: 8.882e-16
+[test] 4743 rows from ['LU230-500-1_train_X.csv', 'LU_Network-500-1_train_X.csv', 'SLAM_spheric-500-1_train_X.csv']
+  trees whose outputs differ on these rows: [(24, 1.6103)]
+  ensemble raw-score max diff: 1.610e-01

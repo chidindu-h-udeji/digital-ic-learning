@@ -1,0 +1,8 @@
+test samples: 185921
+  |diff| > 1e-06:    7177  (3.86%)
+  |diff| > 0.001:    7177  (3.86%)
+  |diff| > 0.01:    5874  (3.16%)
+  |diff| > 0.05:     622  (0.33%)
+  |diff| > 0.1:       6  (0.00%)
+predicted class differs on 188 samples
+mean |diff| over all samples: 0.000973

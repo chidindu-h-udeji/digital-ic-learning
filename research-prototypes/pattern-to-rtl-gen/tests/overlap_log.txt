@@ -1,0 +1,2 @@
+PASS: 2800 vectors, 0 mismatches
+build_overlap/tb_pattern_matching.sv:34: $finish called at 2800000 (1ps)

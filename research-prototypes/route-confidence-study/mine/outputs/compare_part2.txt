@@ -1,0 +1,6 @@
+rows parsed: 19 (expect 19)
+acc    mine 0.804204  key 0.804204  diff +0.000000
+mcc    mine 0.605242  key 0.605242  diff +0.000000
+ece    mine 0.058402  key 0.058402  diff +0.000000
+brier  mine 0.128287  key 0.128287  diff +0.000000
+nll    mine 0.391986  key 0.391986  diff +0.000000
