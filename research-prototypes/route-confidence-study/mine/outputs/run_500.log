@@ -1,0 +1,22 @@
+
+Decision point :  500
+Max Depth values : ['6']
+No: of trees (n_estimators) :  ['30']
+
+Program Start Time :  2026-10-20 23:18:34
+--------------------------------------------------------------------------------------
+
+Capture Binary Classification Data
+      Circuits in Train set :  62
+['CHERI', 'CH_DFSIN', 'EKF-SLAM_Jacobians', 'JPEG', 'LU32PEEng', 'LU8PEEng', 'MCML', 'MMM', 'Reed_Solomon', 'SURF_desc', 'alu4', 'apex2', 'apex4', 'bgm', 'bigkey', 'blob_merge', 'boundtop', 'carpat', 'ch_intrinsics', 'clma', 'des', 'diffeq', 'diffeq1', 'diffeq2', 'dsip', 'elliptic', 'ex1010', 'ex5p', 'fir_cascade', 'frisc', 'jacobi', 'leon2', 'leon3mp', 'mcml', 'misex3', 'mkDelayWorker32B', 'mkPktMerge', 'mkSMAdapter4B', 'murax', 'or1200', 'pdc', 'picosoc', 'radar20', 'random', 'raygentop', 's298', 's38417', 's38584.1', 'seq', 'sha', 'smithwaterman', 'spla', 'stap_steering', 'stereovision0', 'stereovision1', 'stereovision2', 'stereovision3', 'sudoku_check', 'tseng', 'ucsb_152_tap_fir', 'uoft_raytracer', 'wb_conmax']
+      Circuits in Test set :  42
+['LU230', 'LU_Network', 'SLAM_spheric', 'attention_layer', 'bitcoin_miner', 'bitonic_mesh', 'bnn', 'cholesky_bdti', 'cholesky_mc', 'clstm_like.large', 'clstm_like.medium', 'clstm_like.small', 'conv_layer', 'conv_layer_hls', 'dart', 'denoise', 'des90', 'directrf', 'dla_like.medium', 'dla_like.small', 'eltwise_layer', 'gemm_layer', 'gsm_switch', 'lstm', 'mes_noc', 'minres', 'neuron', 'openCV', 'reduction_layer', 'robot_rl', 'segmentation', 'softmax', 'sparcT1_chip2', 'sparcT1_core', 'sparcT2_core', 'spmv', 'stap_qrd', 'stereo_vision', 'tiny_darknet_like.medium', 'tiny_darknet_like.small', 'tpu_like.medium', 'tpu_like.small']
+
+max_depth :  6
+No: of trees (n_estimators) :  30
+['Decision Threshold', 'Max depth', 'No of Trees', 'True Positive (Train)', 'True Negative(Train)', 'False Positive (Train)', 'False Negative (Train)', 'True Positive (Test)', 'True Negative(Test)', 'False Positive (Test)', 'False Negative (Test)', 'Accuracy (Train)', 'MCC (Train)', 'ECE(Train)', 'Brier_score (Train)', 'NLL (train)', 'Accuracy (Test)', 'MCC (Test)', 'ECE(Test)', 'Brier_score (Test)', 'NLL (Test)']
+500,6,30,83180,329042,6286,9052,75185,72995,27304,10437,0.9641266722799139,0.8929825283716054,[0.05026567],0.03047976344906063,0.12376245957043705,0.7970051796193006,0.6071849645960535,[0.03587501],0.13570528136343044,0.4149422357851334
+
+--------------------------------------------------------------------------------------
+
+Program End Time :  2026-10-20 23:27:05

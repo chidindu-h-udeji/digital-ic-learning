@@ -1,12 +1,13 @@
 # Digital IC Design & FPGA Architecture — Learning Portfolio
 
-Self-directed preparation for graduate research in digital IC design and FPGA architecture. Everything here — from HDL fundamentals through a pipelined RISC-V core to a full RTL-to-GDS physical design run — reflects independent understanding: AI tools were used throughout for explanation, debugging, scaffolding, and drafting documentation, but every design decision, testbench scenario, and result here is something I can walk through and defend line by line.
+Self-directed preparation for graduate research in digital IC design and FPGA architecture. The RTL, verification and physical-design projects, from HDL fundamentals through a pipelined RISC-V core to a full RTL-to-GDS run, reflect independent understanding: AI tools were used for explanation, debugging, scaffolding and drafting documentation, but every design decision, testbench scenario and result in them is something I can walk through and defend line by line.
 
 ## Highlights
 - **100+ HDLBits problems solved** across combinational logic, sequential logic, and finite state machines.
 - **5-stage RV32I subset pipeline** — 13 integrated modules, hardware hazard detection and forwarding, measured CPI 1.70 (10 instructions retired, 17 cycles, 1 stall plus 2 flush bubbles).
 - **Full RTL-to-GDS run on the Sky130 PDK via LibreLane** — evaluated multiple clock constraints and floorplan strategies. Quantitatively showed that relaxing the clock period from 20ns to 35ns closes setup timing (+8.90 ns WNS) while electrical violations persist, and integrating a Sky130 1KB SRAM macro cut max fanout violations by 87–97%, slew by 87–88%, and capacitance by 63–86% (referencing [librelane/README.md](librelane/README.md) for DRC and antenna details).
 - **Independent Python tooling** — `parse_timing.py` for comparing JSON metric files across runs and `parse_path_details.py` for parsing per-path text timing reports.
+- **Paper reproductions** (`research-prototypes/`): small-scale re-runs of published hardware and CAD research, each reported against the authors' numbers, including where the results differed.
 
 ## What's here
 
@@ -22,6 +23,9 @@ The RISC-V pipeline taken through the full LibreLane flow on the Sky130 130nm PD
 ### `vtr_fpga_run/` — FPGA Synthesis & Routing
 Verilog-to-Routing (VTR) physical design. Achieved a VPR estimated **103.18 MHz** Fmax (9.69 ns critical path) under the default constraint on VTR's stock 40nm `EArch` architecture, with 44% utilization on a 14x14 grid. Full structural resource metrics, routing details, and the reproducible build script are documented in [`vtr_fpga_run/README.md`](vtr_fpga_run/README.md). 
 *Note: The FPGA flow utilizes a behavioral synchronous-read memory model rather than the Sky130 SRAM macros used in the ASIC flow. Because of this and the differing architecture targets, these metrics represent structural estimates for the core and are not directly comparable to the ASIC results.*
+
+### `research-prototypes/` — Paper Reproductions
+Small-scale reproductions of published research papers, each checked against the authors' reported numbers or independent checkers. Every project README states what matched, what differed and what was not checked. See [`research-prototypes/README.md`](research-prototypes/README.md) for the index and for how AI was used.
 
 ### `hdlbits/`
 Solutions to 100+ HDLBits problems, spanning Verilog language basics through finite state machines — the foundational reps behind everything else in this repo.

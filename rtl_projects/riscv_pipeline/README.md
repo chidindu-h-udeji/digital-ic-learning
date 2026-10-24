@@ -63,7 +63,7 @@ Verified through a full-pipeline test program exercising every case in one seque
 
 | Metric | Value |
 |---|---|
-| Instructions retired | 10 |
+| Instructions retired | 10 (from the program trace) |
 | Total active cycles | 17 |
 | Stall cycles | 1 |
 | Flush bubbles | 2 (derived from taken branches × 2) |
@@ -97,7 +97,7 @@ riscv_pipeline/
 
 ## How to Run
 
-> **Note:** Simulating the data memory and core integration tests on this branch requires the OpenRAM Sky130 SRAM macro Verilog model. The `SKY130_SRAM_PATH` environment variable must point directly to the `.v` file. Without this macro, exactly 2 of the 18 tests will fail.
+> **Note:** `sim_data_memory.sh` and `sim_core.sh` each run a second simulation of the Sky130 SRAM macro model (`-D__pnr__`), which is not in this repo. Point `SKY130_SRAM_PATH` at the macro's `.v` file (not its folder), or place it under `sky130_sram_macros/` at the repo root. Without it, exactly those two of the 18 tests fail and `run_all_tests.sh` exits 1.
 
 * **Individual module tests:** from within any subdirectory, `./sim_<module>.sh`
 * **Full regression suite:** `./run_all_tests.sh` from the `riscv_pipeline` root — runs all module-level testbenches in pipeline order and reports pass/fail per module plus an aggregate summary.

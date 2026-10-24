@@ -27,7 +27,7 @@ The 5-stage RV32I core was evaluated under multiple constraints and physical arc
 **RTL Identity & Simulation Note:**
 
 * **RTL Baseline:** 17 of the module files match `main` at commit `8f67a7e`. The top-level file used for baseline physical design is `riscv_core_baseline.sv`, which differs only by adding a `probe_out` port.
-* **Macro Sourcing:** The SRAM Macro runs utilize a modified RTL branch featuring an `observe_out` port, synchronous-read memory, and an `EX/MEM` pipeline register bypass to accommodate the native 1-cycle access latency of the Sky130 SRAM macro. `SKY130_SRAM_PATH` must point directly to the simulation `.v` file (not the directory). The SRAM macros were obtained from the open-source `sky130_sram_macros` repository.
+* **Macro Sourcing:** The three macro runs use the current `rtl_projects/riscv_pipeline` RTL built with `-D__pnr__`. Its macro-compatible changes (an `observe_out` port, synchronous-read memory fed from the EX stage, and the `EX/MEM` pipeline register bypass, all introduced in commit `4f36ad5`) match the native 1-cycle access latency of the Sky130 SRAM macro. `SKY130_SRAM_PATH` must point directly to the simulation `.v` file (not the directory). The SRAM macros were obtained from the open-source `sky130_sram_macros` repository.
 * Passing the 18-test regression suite requires the vendor macro simulation model (`sky130_sram_1kbyte_1rw1r_32x256_8`). A skipped macro simulation will fail the runner.
 
 ### Results Summary
@@ -44,13 +44,18 @@ The 5-stage RV32I core was evaluated under multiple constraints and physical arc
 | **Magic DRC Errors**                |           0           |                   2,832,616                   |                   2,832,616                   |           0           |                   2,832,616                   |
 | **LVS / Antenna**                   |    Clean / 0 nets     |                Clean / 0 nets                 |                Clean / 0 nets                 |    Clean / 0 nets     |                Clean / 2 nets                 |
 
+*Setup WNS values are the worst case across all analysed corners, which is the slow-process corner (`max_ss_100C_1v60`) in every run. The three 20 ns runs fail setup only at the slow-process (ss) corners and pass at the typical corners. At the nominal typical corner (`nom_tt_025C_1v80`) the setup slack is +7.51 ns (20ns RTL baseline), +19.81 ns (35ns RTL baseline), +7.70 ns (20ns macro, absolute floorplan), +16.27 ns (35ns macro) and +7.19 ns (20ns macro, relative floorplan).*
+
 ### Key Technical Findings
 
-1. **Fanout vs. Setup Causality:**
+1. **Fanout Violations vs. Setup Timing:**
    Initial physical synthesis revealed severe physical signal-integrity violations (slew, cap, and fanout) consistent with synthesizing the memory into standard flip-flop arrays. Integrating the Sky130 1KB SRAM macro was consistent with dropping max fanout violations. The relative-area run supports this: while it shrank the die by 28.9% and reduced max slew violations by 88% compared to the baseline, the 20ns setup timing still failed (−4.62ns WNS). This supports that eliminating the heavy memory fanout loading was not sufficient to close setup timing at 50MHz.
 
 2. **Magic DRC Analysis on Macro Runs:**
    The RTL baselines are perfectly DRC clean. Conversely, Magic reports 2,832,616 DRC errors on the SRAM macro runs (the top rules being `diff/tap.9` and `li.1`). Spatial bounding-box analysis confirms that all markers fall strictly within the vendor-provided SRAM macro's layout box (X: 150-629.78, Y: 150-547.5). While the core routing logic contains no markers outside the macro box, the runs themselves are not DRC-clean as built.
+
+3. **Magic vs. KLayout XOR on Macro Runs:**
+   LibreLane's `KLayout.XOR` step compares the GDS streamed out by Magic with the GDS streamed out by KLayout; a difference means the two tools disagree about the layout. Both RTL baselines report 0 differences (`design__xor_difference__count`). The three macro runs report 1,873,147 (20ns, absolute floorplan), 1,873,017 (35ns) and 1,875,242 (20ns, relative floorplan). I did not investigate the cause, and I did not check where the differences lie relative to the macro's layout box.
 
 ## Repository Structure
 

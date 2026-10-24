@@ -16,7 +16,7 @@ A learning exercise on *Enabling Risk Management of Machine Learning Predictions
   - `compare_*.py`, `diff_summary.py`: comparisons with the answer key, and between retrained and saved models.
   - `compare_ece_variants.py`, `reliability_500.py`: ECE binning study and reliability table.
   - `table4_check.py`, `dump_xlsx.py`: Table 4 estimate and a spreadsheet reader that needs no pandas.
-- **`mine/outputs/`:** saved output of each check, including `baseline.log` and `part2.log` (the output of the authors' part 2 script, which I ran).
+- **`mine/outputs/`:** saved output of each check, including `baseline.log`, `part2.log` (the output of the authors' part 2 script, which I ran) and `run_500.log` (the printed output of the threshold-500 run, whose values `my_metrics.py` checks against).
 
 ## Setup
 

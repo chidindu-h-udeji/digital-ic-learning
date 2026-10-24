@@ -37,3 +37,7 @@ librelane/runs/**
 !librelane/runs/*/final/sdc/*.sdc
 sky130_sram_macros/
 results.csv
+
+# Evidence files for research-prototypes (checked: no local paths; results.csv matches README)
+!research-prototypes/route-confidence-study/mine/outputs/*.log
+!research-prototypes/gramm-repro/results.csv
