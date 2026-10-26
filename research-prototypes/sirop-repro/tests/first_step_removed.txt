@@ -1,0 +1,2 @@
+test/test_top.vhd:8527:9:@16850ns:(report note): LATENCY: 841 cycles
+test/test_top.vhd:8553:9:@16890ns:(assertion note): Test done.

@@ -1,6 +1,6 @@
 # research-prototypes
 
-Learning exercises on research papers, so far in FPGA and CGRA CAD. Each project re-implements or re-runs part of a paper's experiment at small scale, and reports what reproduced, what didn't, and what was not checked.
+Learning exercises on research papers in hardware design automation. Each project re-implements or re-runs part of a paper's experiment at small scale, and reports what reproduced, what didn't, and what was not checked.
 
 ## Projects
 
@@ -9,6 +9,7 @@ Each project README opens with a short summary of what was found.
 - [gramm-repro](gramm-repro/): re-implementation of the GRAMM CGRA mapper (Zhou, Stojilović, Anderson). The ordering of the paper's variants reproduces; the size of the PathFinder gain does not (44% here against 97% in the paper).
 - [pattern-to-rtl-gen](pattern-to-rtl-gen/): flat vs. decomposed pattern matching (Garg & Boutros, arXiv:2607.16058), run at reduced scale with Yosys. The decomposed design uses fewer LUTs only at high repetition (best case 1.34×).
 - [route-confidence-study](route-confidence-study/): ML confidence for FPGA routability (Gunter et al., MLCAD '24). The test halves of Tables 2 and 3 reproduce exactly from the authors' artifact; Table 4 only approximately.
+- [sirop-repro](sirop-repro/): the dot-product example of the Sirop HLS IR (Hildebrand & Dubach, LCTES '26), written in RTL and compared with the authors' compiler. Structure and latency match (841 cycles at N = 840); the generated reduce keeps a `first_step` flag that appears redundant for a sum.
 
 ## How AI assistance was used
 

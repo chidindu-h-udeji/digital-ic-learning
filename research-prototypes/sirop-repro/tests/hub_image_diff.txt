@@ -1,0 +1,7 @@
+# Docker Hub image vs the artifact's docker-image.tar: generated dot (checked 2026-10-26)
+submission image (from docker-image.tar): sirop-artifact:submission  ID sha256:3cb9ed42edf5eb74ecd169f72bfaaac51acc9e51609fbeaaad67cc76caa05ed7
+Docker Hub image: louishildebrand/sirop-lctes26-artifact:latest  ID sha256:8795ca055fee69998f54a6cdf613172713a32e35d23103014dc9a06e5bc97855  digests [louishildebrand/sirop-lctes26-artifact@sha256:8795ca055fee69998f54a6cdf613172713a32e35d23103014dc9a06e5bc97855]
+compiler version, submission image: 1.2.0-2d9abb64
+compiler version, Docker Hub image: 1.2.0-e1a9c2fd
+files compared (design/ and test/): 6 vs 6
+diff exit status: design 0, test 0 (0 = no differences)

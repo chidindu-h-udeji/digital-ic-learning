@@ -1,0 +1,11 @@
+--- artifact/sirop-lctes26-artifact/sirop/src/test/vhdl/sirop/dot/design/sbuild_2.vhd	2026-10-26 10:04:40.822048420 +0100
++++ build/dot_nofirst/design/sbuild_2.vhd	2026-10-26 17:59:26.001456415 +0100
+@@ -73,7 +73,7 @@
+     can_update_acc <= (not valid_internal or sl2bool(ready)) and all_required_producers_valid;
+     transfer_ok <= sl2bool(ready) and valid_internal;
+     -- Intermediate signals
+-    ite_83 <= (s_75_data_internal) when (first_step_79) else ((acc_82) + (s_75_data_internal));
++    ite_83 <= (acc_82) + (s_75_data_internal);
+     -- Output ports
+     data <= std_logic_vector(data_internal);
+     valid <= bool2sl(valid_internal);
