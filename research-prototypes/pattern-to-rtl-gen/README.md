@@ -2,14 +2,13 @@
 
 *Built with AI assistance; see the [research-prototypes README](../README.md) for the project-wide disclosure.*
 
-A learning exercise to understand Garg & Boutros's parser generator ([arXiv:2607.16058](https://arxiv.org/abs/2607.16058)). I wrote a small matcher generator and verified it by simulation, then ran the authors' open-source backend on synthetic patterns and compared flat and decomposed designs with Yosys (the Section VI experiment, at reduced scale). It tests the paper's flat-vs-decomposed claim at reduced scale with a different tool; it does not reproduce the paper's absolute numbers.
+A learning exercise on Garg & Boutros's parser generator ([arXiv:2607.16058](https://arxiv.org/abs/2607.16058)). I wrote a small matcher generator and verified it by simulation, then ran the authors' open-source backend on synthetic patterns and compared flat and decomposed designs with Yosys (the Section VI experiment, at reduced scale). It tests the paper's flat-vs-decomposed claim with a different tool; it does not reproduce the paper's absolute numbers.
 
 ## Implementation and attribution
 
-- **`gen_parser.py`:** My generator for the paper's Fig. 2 single-stage matcher, verified by simulation (`tests/`). It emits cascaded ternary operators instead of the paper's `if/else-if` `always_comb` block; both implement first-listed-wins priority (paper, Section III-A).
-- **`make_synth.py`, `run_sweep.py`, `plot_results.py`:** My Python experiment harness for pattern generation, synthesis, data collection, and visualization.
-- **`check_cfg.py`, `check_flat.py`:** Configuration and synthesis checks used to investigate discrepancies in the results.
-- **RTL backend:** The authors' MIT-licensed backend, at commit `23c7c1a29008677637764c2bdf07ebcd505b0e42`, generates the flat and decomposed RTL.
+- **`gen_parser.py`:** my generator for the paper's Fig. 2 single-stage matcher, verified by simulation (`tests/`). It emits cascaded ternary operators instead of the paper's `if/else-if` `always_comb` block; both implement first-listed-wins priority (Section III-A).
+- **`make_synth.py`, `run_sweep.py`, `plot_results.py`:** my harness for pattern generation, synthesis, data collection and plotting. **`check_cfg.py`, `check_flat.py`:** configuration checks used to investigate discrepancies.
+- **RTL backend:** the authors' MIT-licensed backend, commit `23c7c1a29008677637764c2bdf07ebcd505b0e42`, generates the flat and decomposed RTL.
 
 ## Setup
 
@@ -27,33 +26,22 @@ A learning exercise to understand Garg & Boutros's parser generator ([arXiv:2607
 | Pattern seeds | 1, 2, 3 |
 | Paper's setting (reference only) | N = 4096, `u` ∈ {256, 512, 1024}, Vivado 2025.2 on AMD Versal (xcvc1902) |
 
-FSM extraction is disabled to keep the netlist comparison simple. The experiments use three distinct pattern seeds per configuration.
+FSM extraction is disabled to keep the netlist comparison simple.
 
 ## Reproducing
 
-The synthesis harness expects the authors' repository at `~/patterns-to-parsers`. `check_cfg.py` and `check_flat.py` reuse `sweep_work/u32_ug1_s1.pir`, so run `run_sweep.py` first. Pattern generation is not fully reproducible between runs (see Limitations), so a fresh sweep reproduces the counts to within about 0.5% per point, not exactly.
-
-Run the sweep:
+The harness expects the authors' repository at `~/patterns-to-parsers`. `check_cfg.py` and `check_flat.py` reuse `sweep_work/u32_ug1_s1.pir`, so run the sweep first:
 
 ```bash
-python3 run_sweep.py
+python3 run_sweep.py      # writes results_seeded.csv; resumes completed configurations
+python3 plot_results.py   # table and chart
 ```
 
-The sweep writes `results_seeded.csv` and resumes previously completed configurations.
-
-Generate the table and chart:
-
-```bash
-python3 plot_results.py
-```
-
-Simulation evidence for `gen_parser.py`, including successful tests, a deliberately introduced failure, and overlapping-pattern priority, is documented in [`tests/README.md`](tests/README.md).
+Pattern generation is not fully reproducible between runs (see Limitations), so a fresh sweep reproduces the counts to within about 0.5% per point. Simulation evidence for `gen_parser.py` (passing tests, a deliberately introduced failure, overlapping-pattern priority) is in [`tests/README.md`](tests/README.md).
 
 ## Results
 
-The table reports mean LUT counts across three pattern seeds. The ratio is **Flat LUTs / Decomposed LUTs**; values above 1 favour the decomposed design.
-
-**Data provenance:** All 72 rows in `results_seeded.csv` were produced by the committed `run_sweep.py`, in two runs: the decomposed rows first, then the flat rows. An earlier sweep used `col_per_file=1` for the decomposed design and extra `data_width`/`max_width` keys; it is kept as `results_seeded_colperfile1.csv`. Re-running the 36 flat points with the committed harness changed individual flat counts by at most 13 LUTs (0.5%) and the table's flat means by at most 5 LUTs, and no ratio changed at two decimals. The earlier flat rows are kept in `results_seeded_before_flat_rerun.csv`. Because the two halves came from separate runs, the flat and decomposed rows for a given seed use slightly different pattern sets (see Limitations).
+Mean LUT counts across three pattern seeds. The ratio is **Flat LUTs / Decomposed LUTs**; values above 1 favour the decomposed design.
 
 | Repetition | Uniqueness (`u`) | Groups (`ug`) | Flat LUTs (mean) | Decomposed LUTs (mean) | Ratio | Decomposed FFs |
 |---|---:|---:|---:|---:|---:|---:|
@@ -72,38 +60,36 @@ The table reports mean LUT counts across three pattern seeds. The ratio is **Fla
 
 ![LUT ratio chart](lut_ratio_chart.png)
 
-The flat design uses exactly 105 FFs in every run. LUT counts across the three seeds vary by at most approximately 1.6% relative to the mean (largest for decomposed at `u=64`, `ug=4`; the flat design stays below 1%).
+The flat design uses exactly 105 FFs in every run. LUT counts vary across seeds by at most about 1.6% of the mean (largest for decomposed at `u=64`, `ug=4`; flat stays below 1%).
+
+**Data provenance.** All 72 rows of `results_seeded.csv` come from the committed `run_sweep.py`, in two runs (decomposed first, then flat), with `data_width` and `max_width` absent, so the backend skips `parser_top` generation. Because the halves came from separate runs, flat and decomposed rows for the same seed use slightly different pattern sets (see Limitations). An earlier sweep used `col_per_file=1` for the decomposed design plus extra `data_width`/`max_width` keys; it is kept as `results_seeded_colperfile1.csv`. Rerunning the 36 flat points changed individual counts by at most 13 LUTs (0.5%) and the table's means by at most 5, with no ratio changing at two decimals; the earlier flat rows are in `results_seeded_before_flat_rerun.csv`. As a check, `check_flat.py` ran the authors' exact `one_group.json` at `u=32`, `ug=1`, seed 1 and gave 2496 LUTs and 105 FFs, against 2496 in the earlier sweep and 2503 in the rerun; the 7-LUT difference is within run-to-run variation, so the extra config keys do not explain it.
 
 ## Observations
 
-- **Crossover point:** The decomposed design uses fewer LUTs only when repetition and structural grouping are sufficient. The ratio crosses 1 between `ug=2` and `ug=3` at 8× repetition, between `ug=3` and `ug=4` at 4× repetition, and does not cross 1 at 2× repetition. The best case is a ratio of 1.34 at `u=32`, `ug=4`. At the crossover points, the ratio exceeds 1 for all three seeds, but the margins are only about 4–5%, with just three seeds and one synthesis tool.
-- **Possible fixed overhead:** At `ug=1`, the decomposed design uses approximately 1.47–1.49× as many LUTs as the flat design. This ratio changes little with `u`, suggesting a structural overhead (such as the extra stage or group structure) as one possible explanation. This is a hypothesis, not a demonstrated mechanism.
-- **Flat-design sensitivity:** At `u=32`, the flat design's LUT count falls by approximately 22% as `ug` increases from 1 to 4 (2497 → 1954). The paper reports that flat LUT counts are largely insensitive to repetition when using Vivado (a slight drop from `ug=1` to `ug=2`, then a plateau). The difference may reflect Yosys/ABC optimizing shared combinatorial logic, but the cause has not been isolated.
-- **Flip-flops:** The flat design uses a constant 105 FFs, which agrees with the paper's finding that flat FF counts do not depend on repetition. The decomposed design uses 120–131 FFs, approximately 14–25% more than flat in every configuration. This is the opposite ordering to the paper, which reports flat designs at about 9.3–10.4K FFs and decomposed designs with far fewer, falling from about 5.1K at `ug=1` to 715 at `u=256`, `ug=4` (Vivado 2025.2, N=4096, FFs marked `DONT_TOUCH`). The direction of the trend matches, since decomposed FFs fall as `ug` and repetition rise, but my drop is small (131 → 120, about 8%) compared with the paper's. My absolute counts are also much smaller: about 90–100× for flat and about 40× for decomposed at `ug=1`, but only about 6× for decomposed at `ug=4` (120 vs. 715, at different `u`). I did not investigate why.
-- **Configuration sensitivity:** An earlier sweep using `col_per_file=1` for the decomposed design produced 3.5–13.5% fewer LUTs and roughly half the FFs (62–73), with a best-case ratio of 1.53 instead of 1.34. For `u=32`, `ug=1`, seed 1, changing this setting changed the result from 3609 to 3743 LUTs and from 71 to 129 FFs. Adding `data_width` and `max_width` did not change that result. This indicates that `col_per_file` changes the generated design, not merely its file layout.
-- **`ug=1` discrepancy:** The paper reports fewer LUTs for the decomposed design even at `ug=1` (about 2.3× fewer). Here, ratios of 0.67–0.68 indicate that the flat design uses fewer LUTs. Possible explanations include Yosys/ABC versus Vivado, the smaller pattern count, and differences in pattern generation. These factors have not been separated. For context, my flat designs use approximately 7.6–10.2 LUTs per pattern, compared with about 70 per pattern in the paper's flat design at N=4096 (about 285K LUTs at `u=256`, `ug=2–4`, Vivado). No conclusion about the cause can be drawn from this comparison alone.
+- **Crossover.** The decomposed design uses fewer LUTs only with enough repetition and structural grouping: the ratio crosses 1 between `ug=2` and `ug=3` at 8×, between `ug=3` and `ug=4` at 4×, and not at all at 2×. The best case is 1.34 at `u=32`, `ug=4`. At the crossovers the ratio exceeds 1 for all three seeds, but only by about 4–5%, with three seeds and one tool.
+- **Possible fixed overhead.** At `ug=1` the decomposed design uses about 1.47–1.49× the flat design's LUTs, almost independent of `u`. A structural overhead (such as the extra stage or group structure) is one possible explanation; it is a hypothesis, not a demonstrated mechanism.
+- **Flat-design sensitivity.** At `u=32`, flat LUTs fall about 22% from `ug=1` to `ug=4` (2497 → 1954). The paper reports flat LUTs as largely insensitive to repetition with Vivado (a slight drop from `ug=1` to `ug=2`, then a plateau). Yosys/ABC sharing combinational logic may explain the difference; the cause has not been isolated.
+- **Flip-flops.** Flat FFs are constant at 105, matching the paper's finding that they do not depend on repetition. Decomposed designs use 120–131, about 14–25% more than flat, which is the opposite ordering to the paper (flat about 9.3–10.4K; decomposed falling from about 5.1K at `ug=1` to 715 at `u=256`, `ug=4`; Vivado 2025.2, N=4096, FFs marked `DONT_TOUCH`). The trend direction matches, since decomposed FFs fall as `ug` and repetition rise, but my drop is small (131 → 120, about 8%). My absolute counts are much smaller: about 90–100× for flat and about 40× for decomposed at `ug=1`, but only about 6× at `ug=4` (120 vs. 715, at different `u`). I did not investigate why.
+- **Configuration sensitivity.** The earlier `col_per_file=1` sweep gave 3.5–13.5% fewer decomposed LUTs and roughly half the FFs (62–73), with a best ratio of 1.53 instead of 1.34. For `u=32`, `ug=1`, seed 1, this setting alone moved the result from 3609 to 3743 LUTs and from 71 to 129 FFs, while adding `data_width` and `max_width` changed nothing. So `col_per_file` changes the generated design, not just its file layout.
+- **`ug=1` discrepancy.** The paper reports about 2.3× fewer LUTs for decomposed even at `ug=1`; here the ratio is 0.67–0.68, favouring flat. Possible causes (Yosys/ABC vs. Vivado, the smaller pattern count, pattern generation) have not been separated. For context, my flat designs use about 7.6–10.2 LUTs per pattern against about 70 in the paper's flat design at N=4096 (about 285K LUTs at `u=256`, `ug=2–4`); this comparison alone supports no conclusion about the cause.
 
 ## Limitations
 
-- The experiment uses Yosys only and includes no timing or place-and-route measurements. The paper reports higher Fmax for decomposed designs using Vivado: 230–282 MHz versus 166–192 MHz for flat designs.
-- N=256 is substantially smaller than the paper's N=4096, and my `u` values (32–128) and repetition factors (2×–8×) differ from the paper's (`u` of 256–1024, 4×–16×), so the sweeps are not directly comparable.
-- The generated patterns are synthetic and contain repeated substrings; they do not represent a broad set of real-world pattern-matching workloads.
-- A control attempt to synthesize the authors' N=4096 flat design (`artifact_out/fig9/flat_u256_ug1`) with the same Yosys flow was killed by the out-of-memory killer at approximately 2.5 GB on a 3.8 GB WSL machine. The decomposed control design was not attempted.
-- Pattern generation in `make_synth.py` builds each column from a Python `set` of strings before shuffling, so the pattern files differ between runs even with the same seed. I confirmed this: `make_patterns(256, 32, 1, seed=1)` produces different output under different `PYTHONHASHSEED` values. This is the likely cause of the flat-count differences between the two runs (up to 13 LUTs, 0.5%), though I did not isolate it further. The flat and decomposed rows for the same seed therefore came from separate runs and use slightly different pattern sets. Sorting the sets before shuffling would make generation deterministic; I did not change the generator because that would require rerunning all 72 points. The effect is far smaller than the 4–5% crossover margins.
+- Yosys only, with no timing or place-and-route. The paper reports higher Fmax for decomposed designs with Vivado: 230–282 MHz against 166–192 MHz for flat.
+- N=256, `u` of 32–128 and repetition of 2×–8× differ from the paper's N=4096, `u` of 256–1024 and 4×–16×, so the sweeps are not directly comparable.
+- Patterns are synthetic with repeated substrings and do not represent real-world workloads.
+- A control synthesis of the authors' N=4096 flat design (`artifact_out/fig9/flat_u256_ug1`) with the same Yosys flow was killed by the out-of-memory killer at about 2.5 GB on a 3.8 GB WSL machine. The decomposed control was not attempted.
+- `make_synth.py` builds each column from a Python `set` before shuffling, so pattern files differ between runs even with the same seed; I confirmed this with different `PYTHONHASHSEED` values for `make_patterns(256, 32, 1, seed=1)`. This is the likely cause of the flat-count differences between runs (up to 13 LUTs, 0.5%), though not isolated further. Sorting the sets would fix it but would mean rerunning all 72 points; the effect is far smaller than the 4–5% crossover margins.
 
-## Appendix: Configuration and flag verification
+## Appendix: configuration
 
-### Authors' synthesis command
-
-The authors' Makefile, lines 461–463, uses the same RTL-generation command for both designs:
+The authors' Makefile (lines 461–463) uses the same RTL-generation command for both designs:
 
 ```bash
 PYTHONPATH=engine python3 engine/tools/build_rtl_countluts.py \
     -c <config.json> -m <patterns> -o <output> \
     --rtl --tree1 --tree2
 ```
-
-### Design configurations
 
 | Setting | Flat (`one_group.json`) | Decomposed (`multi_group.json`) |
 |---|---:|---:|
@@ -112,11 +98,7 @@ PYTHONPATH=engine python3 engine/tools/build_rtl_countluts.py \
 | `col_per_file` | 1 | 4 |
 | `custom` | `[]` | `[]` |
 
-These are the authors' original configurations.
-
-### Harness configuration
-
-`run_sweep.py` uses the same settings and flags:
+These are the authors' original configurations. `run_sweep.py` uses the same settings and flags (serialized with `"custom": []`):
 
 ```python
 FLAGS = ["--rtl", "--tree1", "--tree2"]
@@ -126,13 +108,3 @@ CFG = {
     "decomposed": dict(num_cols=4, char_per_col=5,  col_per_file=4)
 }
 ```
-
-The harness serializes each configuration as JSON with `"custom": []`.
-
-### Provenance of `results_seeded.csv`
-
-All rows come from the committed `run_sweep.py`: the decomposed rows from one run and the flat rows from a second run, with `data_width` and `max_width` absent from both (the backend then skips `parser_top` generation).
-
-`check_flat.py` ran the authors' exact `one_group.json` for `u=32`, `ug=1`, seed 1 and returned 2496 LUTs and 105 FFs. The earlier sweep (which also set `data_width=80, max_width=80`) recorded 2496 for that point, and the rerun recorded 2503. The 7-LUT difference is within the run-to-run variation described under Limitations, so the extra config keys do not explain it.
-
-The separate configuration checks are in `check_cfg.py` and `check_flat.py`. The earlier decomposed results using `col_per_file=1` are retained in `results_seeded_colperfile1.csv`, and the earlier flat rows in `results_seeded_before_flat_rerun.csv`.
